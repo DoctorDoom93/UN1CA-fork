@@ -4,6 +4,8 @@ if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "qssi" ]]; then
     DONOR="a73xqxx"
 elif [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "essi" ]]; then
     DONOR="a54xnsxx"
+elif [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "mssi" ]]; then
+    DONOR="$TARGET_FIRMWARE"
 else
     ABORT "Unknown SSI: $TARGET_OS_SINGLE_SYSTEM_IMAGE"
 fi
