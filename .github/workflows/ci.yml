@@ -56,8 +56,17 @@ jobs:
             /opt/hostedtoolcache \
             /usr/local/share/powershell \
             /usr/local/share/chromium \
-            /usr/local/lib/node_modules
-          sudo docker system prune -af --volumes
+            /usr/local/lib/node_modules \
+            /usr/share/swift \
+            /usr/local/share/boost \
+            /usr/local/graalvm \
+            /usr/share/sbt \
+            /usr/share/gradle* \
+            /usr/share/miniconda \
+            /var/lib/docker
+          sudo swapoff -a 2>/dev/null || true
+          sudo rm -f /mnt/swapfile /swapfile 2>/dev/null || true
+          sudo docker system prune -af --volumes 2>/dev/null || true
           df -h
 
       - name: Set up build environment
