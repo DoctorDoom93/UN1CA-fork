@@ -148,13 +148,13 @@ if $BUILD_ROM; then
         "$SRC_DIR/scripts/internal/apply_modules.sh" "$SRC_DIR/target/$TARGET_CODENAME/patches" || exit 1
         LOG_STEP_OUT
     fi
-    if [ -d "$SRC_DIR/unica/patches" ]; then
+    if [ "${APPLY_UNICA_PATCHES:-true}" == "true" ] && [ -d "$SRC_DIR/unica/patches" ]; then
         LOG_STEP_IN true "Applying ROM patches"
         "$SRC_DIR/scripts/internal/apply_modules.sh" "$SRC_DIR/unica/patches" || exit 1
         LOG_STEP_OUT
     fi
 
-    if [ -d "$SRC_DIR/unica/mods" ]; then
+    if [ "${APPLY_UNICA_MODS:-true}" == "true" ] && [ -d "$SRC_DIR/unica/mods" ]; then
         LOG_STEP_IN true "Applying ROM mods"
         "$SRC_DIR/scripts/internal/apply_modules.sh" "$SRC_DIR/unica/mods" || exit 1
         LOG_STEP_OUT
