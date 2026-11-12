@@ -143,6 +143,9 @@ APPLY_TARGET_FEATURE()
 
     local SOURCE_FILE="$WORK_DIR/system/system/etc/floating_feature.xml"
     local TARGET_FILE="$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/floating_feature.xml"
+    if [ ! -f "$TARGET_FILE" ] && [ -f "$SOURCE_FILE" ]; then
+        TARGET_FILE="$SOURCE_FILE"
+    fi
 
     local FEATURE
     local SOURCE_VALUE

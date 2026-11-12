@@ -136,9 +136,6 @@ if $BUILD_ROM; then
 
     LOG_STEP_IN true "Creating work dir"
     "$SRC_DIR/scripts/internal/create_work_dir.sh" || exit 1
-    if [ -n "$GITHUB_ACTIONS" ]; then
-        rm -rf "$FW_DIR"
-    fi
     LOG_STEP_OUT
 
     if [ -d "$SRC_DIR/platform/$TARGET_PLATFORM/patches" ]; then
@@ -164,6 +161,10 @@ if $BUILD_ROM; then
     fi
 
     BUILD_APKS
+
+    if [ -n "$GITHUB_ACTIONS" ]; then
+        rm -rf "$FW_DIR"
+    fi
 
     echo -n "$(GET_WORK_DIR_HASH)" > "$WORK_DIR/.completed"
 fi
