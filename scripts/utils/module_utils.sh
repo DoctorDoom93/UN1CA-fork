@@ -44,7 +44,11 @@ APPLY_PATCH()
     DECODE_APK "$PARTITION" "$FILE" || return 1
 
     LOG "- Applying \"$(grep "^Subject:" "$PATCH" | sed "s/.*PATCH] //")\" to /$PARTITION/$FILE"
-    EVAL "LC_ALL=C git apply --directory=\"$APKTOOL_DIR/$PARTITION/${FILE//system\//}\" --verbose --unsafe-paths \"$PATCH\"" || return 1
+	EVAL "LC_ALL=C patch -p1 \
+	-d \"$APKTOOL_DIR/$PARTITION/${FILE//system\//}\" \
+	-N --forward -l \
+	< \"$PATCH\"" || return 1
+    # EVAL "LC_ALL=C git apply --directory=\"$APKTOOL_DIR/$PARTITION/${FILE//system\//}\" --verbose --unsafe-paths \"$PATCH\"" || return 1
 }
 
 # DECODE_APK <partition> <apk/jar>
@@ -64,6 +68,7 @@ DECODE_APK()
 
 # GET_GALAXY_STORE_DOWNLOAD_URL "<package name/id>"
 # Returns a URL to download the desired app from Samsung servers.
+# On SDK 37 / One UI 9, a missing URL returns a marker handled by DOWNLOAD_FILE.
 GET_GALAXY_STORE_DOWNLOAD_URL()
 {
     _CHECK_NON_EMPTY_PARAM "PACKAGE" "$1" || return 1
@@ -75,22 +80,24 @@ GET_GALAXY_STORE_DOWNLOAD_URL()
     local SYSTEMID
     local PROTOCOL
 
+    # Galaxy S26 Ultra EUR_OPENX
     # Galaxy S25 Ultra EUR_OPENX
-    # Galaxy S22 Ultra GBL_OPENX
     # Galaxy S25 Ultra KOR_SINGLEX
-    DEVICES=("SM-S938B" "SM-S901E" "SM-S938N")
+    # Galaxy S23 Ultra GBL_OPENX
+    
+    DEVICES=("SM-S948B" "SM-S938B" "SM-S938N" "SM-S918B")
 
     OS="$(GET_PROP "system" "ro.build.version.sdk")"
     ONEUI="$(GET_PROP "system" "ro.build.version.oneui")"
     SYSTEMID="$(date "+%s")"
 
     if [ ! "$OS" ]; then
-        # Fallback to Android 16
-        OS="36"
+        # Fallback to Android 17
+        OS="37"
     fi
     if [ ! "$ONEUI" ]; then
-        # Fallback to One UI 8.0
-        ONEUI="80000"
+        # Fallback to One UI 9.0
+        ONEUI="90000"
     fi
 
     PROTOCOL+="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>"
@@ -127,6 +134,12 @@ GET_GALAXY_STORE_DOWNLOAD_URL()
             return 0
         fi
     done
+
+    if [[ "$OS" == "37" || "$ONEUI" == 9???? ]]; then
+        # Command substitution must contain only the marker, never log output.
+        echo "galaxy-store-source:$PACKAGE"
+        return 0
+    fi
 
     LOGE "No download URI found for app \"$PACKAGE\""
     return 1

@@ -176,6 +176,61 @@ _HANDLE_SPECIAL_CHARS()
 
     echo "$STRING"
 }
+
+_REBUILD_SPLIT_FILES_IN_WORK_DIR()
+{
+    local SOURCE_DIR="${1%/.}"
+    local TARGET_DIR="${2%/.}"
+    local SPLIT_FILE
+    local SPLIT_REL
+    local TARGET_SPLIT
+    local TARGET_FILE
+
+    while IFS= read -r SPLIT_FILE; do
+        [ "$SPLIT_FILE" ] || continue
+        [ -e "${SPLIT_FILE%.*}.01" ] || continue
+
+        SPLIT_REL="${SPLIT_FILE#$SOURCE_DIR/}"
+        TARGET_SPLIT="$TARGET_DIR/$SPLIT_REL"
+        TARGET_FILE="${TARGET_SPLIT%.*}"
+
+        if [ -e "${SPLIT_FILE%.*}" ]; then
+            LOG "- Removing copied split chunks for $(sed -e "s|$WORK_DIR||" -e "s|/\.||" <<< "$TARGET_FILE")"
+            EVAL "rm -f \"$TARGET_FILE.\"[0-9][0-9]" || return 1
+            continue
+        fi
+
+        LOG "- Rebuilding split file $(sed -e "s|$WORK_DIR||" -e "s|/\.||" <<< "$TARGET_FILE")"
+        EVAL "cat \"$TARGET_FILE.\"[0-9][0-9] > \"$TARGET_FILE\"" || return 1
+        EVAL "rm -f \"$TARGET_FILE.\"[0-9][0-9]" || return 1
+    done < <(find "$SOURCE_DIR" \( -name "*.bak" -o -name "*.bak.*" \) -prune -o -type f -name "*.00" -print 2> /dev/null)
+}
+
+_FILTER_SPLIT_FILE_ENTRIES()
+{
+    local FILES="$1"
+    local FILTERED_FILES=""
+    local FILE
+    local BASE
+
+    while IFS= read -r FILE; do
+        [ "$FILE" ] || continue
+
+        if [[ "$FILE" == *.[0-9][0-9] ]]; then
+            BASE="${FILE%.*}"
+            if grep -q -x -F "$BASE.00" <<< "$FILES" && grep -q -x -F "$BASE.01" <<< "$FILES"; then
+                if [[ "$FILE" == *".00" ]] && ! grep -q -x -F "$BASE" <<< "$FILES"; then
+                    FILTERED_FILES+="$BASE"$'\n'
+                fi
+                continue
+            fi
+        fi
+
+        FILTERED_FILES+="$FILE"$'\n'
+    done <<< "$FILES"
+
+    printf "%s" "$FILTERED_FILES" | LC_ALL=C sort -u
+}
 # ]
 
 # ADD_TO_WORK_DIR <source> <partition> <file/dir> <user> <group> <mode> <label>
@@ -254,6 +309,12 @@ ADD_TO_WORK_DIR()
         TARGET_FILE+="/$PARTITION/$FILE"
     fi
 
+    # Local editor backups are never ROM payloads, including explicit adds.
+    if [[ "/$FILE/" =~ /[^/]*\.bak(\.[^/]*)?/ ]]; then
+        LOG "- Skipping local backup: $FILE"
+        return 0
+    fi
+
     if [ ! -e "$SOURCE_FILE" ] && [ ! -L "$SOURCE_FILE" ]; then
         if [ -e "$SOURCE_FILE.00" ]; then
             LOG "- Adding $(sed -e "s|$WORK_DIR||" -e "s|/\.||" <<< "$TARGET_FILE") from ${SOURCE//$SRC_DIR\//}"
@@ -270,7 +331,14 @@ ADD_TO_WORK_DIR()
         else
             mkdir -p "$TARGET_FILE"
         fi
-        EVAL "cp -a -T \"$SOURCE_FILE\" \"$TARGET_FILE\"" || exit 1
+        if [ -d "$SOURCE_FILE" ] && [ ! -L "$SOURCE_FILE" ]; then
+            rsync -aHAX --ignore-times --exclude='*.bak' --exclude='*.bak.*' -- "$SOURCE_FILE/" "$TARGET_FILE/" || return 1
+        else
+            EVAL "cp -a -T \"$SOURCE_FILE\" \"$TARGET_FILE\"" || exit 1
+        fi
+        if [ -d "$SOURCE_FILE" ]; then
+            _REBUILD_SPLIT_FILES_IN_WORK_DIR "$SOURCE_FILE" "$TARGET_FILE" || exit 1
+        fi
     fi
 
     local ENTRY="${TARGET_FILE//$WORK_DIR\//}"
@@ -313,10 +381,11 @@ ADD_TO_WORK_DIR()
 
     if [ -d "$TARGET_FILE" ]; then
         local FILES
-        FILES="$(find "${SOURCE_FILE%/.}")"
+        FILES="$(find "${SOURCE_FILE%/.}" \( -name "*.bak" -o -name "*.bak.*" \) -prune -o -print)"
         FILES="${FILES//$SOURCE\//}"
         [[ "$PARTITION" == "system" ]] && FILES="${FILES//system\/system\//system/}"
         $TARGET_OS_BUILD_SYSTEM_EXT_PARTITION || FILES="${FILES//system_ext\//system/system_ext/}"
+        FILES="$(_FILTER_SPLIT_FILE_ENTRIES "$FILES")"
 
         while IFS= read -r f; do
             IS_VALID_PARTITION_NAME "$f" && continue
@@ -477,6 +546,29 @@ DOWNLOAD_FILE()
 
     local URL="$1"
     local OUTPUT="$2"
+
+    # GET_GALAXY_STORE_DOWNLOAD_URL could not find an SDK 37 / One UI 9 app.
+    # Keep the ROM copy (including any prior patches) instead of downloading.
+    if [[ "$URL" == galaxy-store-source:* ]]; then
+        if [ -f "$OUTPUT" ]; then
+            LOG "- Using current ROM app: ${OUTPUT#"$WORK_DIR/"}"
+            return 0
+        fi
+
+        local SOURCE_MODEL="${SOURCE_FIRMWARE%%/*}"
+        local SOURCE_CSC="${SOURCE_FIRMWARE#*/}"
+        SOURCE_CSC="${SOURCE_CSC%%/*}"
+        local SOURCE_APP="$FW_DIR/${SOURCE_MODEL}_${SOURCE_CSC}/${OUTPUT#"$WORK_DIR/"}"
+        if [[ "$OUTPUT" == "$WORK_DIR/"* ]] && [ -f "$SOURCE_APP" ]; then
+            LOG "- Using source firmware app: ${OUTPUT#"$WORK_DIR/"}"
+            mkdir -p "$(dirname "$OUTPUT")" || return 1
+            cp -p "$SOURCE_APP" "$OUTPUT" || return 1
+            return 0
+        fi
+
+        echo "App not available"
+        return 0
+    fi
 
     mkdir -p "$(dirname "$OUTPUT")"
     curl -L -# -o "$OUTPUT" "$URL"
