@@ -14,6 +14,9 @@ import sys, os, glob, re
 sysui_dir = os.path.join(os.environ["APKTOOL_DIR"], "system_ext/priv-app/SystemUI/SystemUI.apk")
 basic_runes = glob.glob(f"{sysui_dir}/**/BasicRune.smali", recursive=True)
 if not basic_runes:
+    basic_runes = glob.glob(f"{sysui_dir}/**/smali*/**/BasicRune.smali", recursive=True)
+
+if not basic_runes:
     sys.exit("Error: BasicRune.smali not found in SystemUI.apk")
 
 patched = False
@@ -21,39 +24,66 @@ for path in basic_runes:
     with open(path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    target_field = "Lcom/android/systemui/BasicRune;->STATUS_REAL_TIME_NETWORK_SPEED:Z"
-    if target_field in content:
-        # Force SYSUI_CHINA_FEATURE to true if checked
-        content = re.sub(
-            r'sget-boolean\s+([vp]\d+),\s*Lcom/android/systemui/Rune;->SYSUI_CHINA_FEATURE:Z',
-            r'const/4 \1, 0x1',
-            content
-        )
-        # Ensure any sput-boolean storing to STATUS_REAL_TIME_NETWORK_SPEED receives 0x1
-        m = re.search(r'([ \t]*)(sput-boolean\s+([vp]\d+),\s*' + re.escape(target_field) + r')', content)
-        if m:
-            indent, sput_line, reg = m.group(1), m.group(2), m.group(3)
-            replacement = f"{indent}const/4 {reg}, 0x1\n\n{indent}{sput_line}"
-            content = content[:m.start()] + replacement + content[m.end():]
-            patched = True
+    orig_content = content
 
-        # In addition, at the end of <clinit>()V before return-void, guarantee STATUS_REAL_TIME_NETWORK_SPEED:Z is true
-        clinit_m = re.search(r'(\.method static constructor <clinit>\(\)V[\s\S]*?)([ \t]*)(return-void\s*\n\s*\.end method)', content)
-        if clinit_m:
-            body, indent, ret_end = clinit_m.group(1), clinit_m.group(2), clinit_m.group(3)
-            ensure_code = (
-                f"{indent}const/4 v0, 0x1\n\n"
-                f"{indent}sput-boolean v0, {target_field}\n\n"
-            )
-            content = content[:clinit_m.start()] + body + ensure_code + indent + ret_end + content[clinit_m.end():]
-            patched = True
+    # 1. Force SYSUI_CHINA_FEATURE check to true if present in BasicRune (Salvo's original patch logic)
+    content, c1 = re.subn(
+        r'sget-boolean\s+([vp]\d+),\s*Lcom/android/systemui/Rune;->SYSUI_CHINA_FEATURE:Z',
+        r'const/4 \1, 0x1',
+        content
+    )
+    if c1 > 0:
+        patched = True
+        print(f"  Replaced Rune.SYSUI_CHINA_FEATURE with 1 ({c1} occurrence(s)) in {os.path.basename(path)}")
 
+    # 2. Check for any network speed field in BasicRune
+    speed_fields = re.findall(r'\.field\s+.*?([A-Za-z0-9_]*NET[A-Za-z0-9_]*SPEED[A-Za-z0-9_]*):Z', content)
+    if not speed_fields and "STATUS_REAL_TIME_NETWORK_SPEED" in content:
+        speed_fields = ["STATUS_REAL_TIME_NETWORK_SPEED"]
+
+    for field_name in set(speed_fields):
+        full_field = f"Lcom/android/systemui/BasicRune;->{field_name}:Z"
+        pattern = r'([ \t]*)sput-boolean\s+([vp]\d+),\s*' + re.escape(full_field)
+        content, c2 = re.subn(pattern, rf'\1const/4 \2, 0x1\n\n\1sput-boolean \2, {full_field}', content)
+        if c2 > 0:
+            patched = True
+            print(f"  Forced sput-boolean for {field_name} in {os.path.basename(path)}")
+        elif full_field not in content:
+            clinit_m = re.search(r'(\.method static constructor <clinit>\(\)V[\s\S]*?)([ \t]*)(return-void\s*\n\s*\.end method)', content)
+            if clinit_m:
+                body, indent, ret_end = clinit_m.group(1), clinit_m.group(2), clinit_m.group(3)
+                ensure_code = (
+                    f"{indent}const/4 v0, 0x1\n\n"
+                    f"{indent}sput-boolean v0, {full_field}\n\n"
+                )
+                content = content[:clinit_m.start()] + body + ensure_code + indent + ret_end + content[clinit_m.end():]
+                patched = True
+                print(f"  Guaranteed {field_name} = 1 in <clinit> of {os.path.basename(path)}")
+
+    if content != orig_content:
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(content)
-        print(f"  Successfully enabled STATUS_REAL_TIME_NETWORK_SPEED in {os.path.basename(path)}")
+
+# Fallback: if BasicRune didn't match, check other Rune classes in SystemUI
+if not patched:
+    all_runes = glob.glob(f"{sysui_dir}/**/smali*/**/*Rune*.smali", recursive=True)
+    for path in all_runes:
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+        if "Lcom/android/systemui/Rune;->SYSUI_CHINA_FEATURE:Z" in content and "NET" in content.upper():
+            content, c = re.subn(
+                r'sget-boolean\s+([vp]\d+),\s*Lcom/android/systemui/Rune;->SYSUI_CHINA_FEATURE:Z',
+                r'const/4 \1, 0x1',
+                content
+            )
+            if c > 0:
+                with open(path, "w", encoding="utf-8", newline="\n") as f:
+                    f.write(content)
+                patched = True
+                print(f"  Patched SYSUI_CHINA_FEATURE in fallback {os.path.basename(path)}")
 
 if not patched:
-    sys.exit("Error: Failed to patch STATUS_REAL_TIME_NETWORK_SPEED in BasicRune.smali")
+    sys.exit("Error: Failed to patch network speed rune in SystemUI.apk")
 PY
 
 # Add padding to NetspeedView measurement in SystemUI.apk
