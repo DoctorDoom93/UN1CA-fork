@@ -63,7 +63,11 @@ jobs:
             /usr/share/sbt \
             /usr/share/gradle* \
             /usr/share/miniconda \
-            /var/lib/docker
+            /var/lib/docker \
+            /usr/share/man \
+            /usr/share/doc \
+            /var/cache/apt/archives
+          sudo apt-get clean || true
           sudo swapoff -a 2>/dev/null || true
           sudo rm -f /mnt/swapfile /swapfile 2>/dev/null || true
           sudo docker system prune -af --volumes 2>/dev/null || true
@@ -128,6 +132,11 @@ jobs:
 
       - name: Extract stock firmwares
         run: ./scripts/extract_fw.sh
+
+      - name: Free Odin disk space
+        run: |
+          rm -rf "$ODIN_DIR"
+          df -h
 
       - name: Build ROM Flashable Zip
         run: ./scripts/make_rom.sh ${{ inputs.build_zip_mode || '-z' }}

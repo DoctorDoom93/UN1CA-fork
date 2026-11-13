@@ -159,6 +159,9 @@ GENERATE_BUILD_INFO
 
 LOG "- Creating zip"
 rm -f "$OUTPUT_FILE"
+if [ -n "$GITHUB_ACTIONS" ]; then
+    rm -rf "$WORK_DIR"
+fi
 EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) -mtc=off -mtm=off \"$OUTPUT_FILE\" -r * -xr!*.bak -xr!*.bak.*" || exit 1
 
 exit 0

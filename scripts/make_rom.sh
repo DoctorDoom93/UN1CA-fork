@@ -162,6 +162,10 @@ if $BUILD_ROM; then
 
     BUILD_APKS
 
+    if [ -n "$GITHUB_ACTIONS" ]; then
+        rm -rf "$APKTOOL_DIR"
+    fi
+
     echo -n "$(GET_WORK_DIR_HASH)" > "$WORK_DIR/.completed"
 fi
 
@@ -177,6 +181,10 @@ if $BUILD_TARGET_FILES || $BUILD_FLASHABLE_ZIP; then
     if [ ! -f "$OUT_DIR/$ZIP_FILE_NAME" ]; then
         LOG_STEP_IN true "Creating target-files zip"
         "$SRC_DIR/scripts/internal/create_target_files_zip.sh" "$OUT_DIR/$ZIP_FILE_NAME" || exit 1
+        if [ -n "$GITHUB_ACTIONS" ]; then
+            rm -rf "$FW_DIR"
+            rm -rf "$OUT_DIR/target/$TARGET_CODENAME/tmp"
+        fi
         LOG_STEP_OUT
     else
         LOGW "File already exists: ${OUT_DIR//$SRC_DIR\//}/$ZIP_FILE_NAME"
