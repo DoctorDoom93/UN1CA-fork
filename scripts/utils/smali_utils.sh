@@ -71,6 +71,17 @@ SMALI_PATCH()
 
     local FILE_PATH="$APKTOOL_DIR/$PARTITION/${FILE//system\//}"
 
+    # Auto-resolve smali file if it moved across multidex partitions (e.g. smali -> smali_classes2/smali_classes4/smali_classes5)
+    if [ ! -f "$FILE_PATH/$SMALI" ]; then
+        local REL_SMALI="${SMALI#smali*/}"
+        REL_SMALI="${REL_SMALI#smali/}"
+        local MATCH
+        MATCH="$(find "$FILE_PATH" -type f -path "*/$REL_SMALI" 2>/dev/null | head -n 1)"
+        if [ -n "$MATCH" ] && [ -f "$MATCH" ]; then
+            SMALI="${MATCH#"$FILE_PATH/"}"
+        fi
+    fi
+
     # Check if provided smali exists
     if [ ! -f "$FILE_PATH/$SMALI" ]; then
         LOGE "Smali not found: \"/$PARTITION/$FILE/$SMALI\""
@@ -108,7 +119,7 @@ SMALI_PATCH()
     fi
 
     # Check if provided method is method and exists inside smali
-    if ! grep "^\.method.*" "$FILE_PATH/$SMALI" | grep -q -F -- "$METHOD" "$FILE_PATH/$SMALI"; then
+    if ! grep "^\.method.*" "$FILE_PATH/$SMALI" | grep -q -F -- "$METHOD"; then
         LOGE "Method \"$METHOD\" not found in /$PARTITION/$FILE/$SMALI"
 
         local MATCHES
