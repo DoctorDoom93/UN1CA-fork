@@ -4,10 +4,9 @@ Date: Fri, 28 Aug 2026 14:10:04 +0200
 Subject: [PATCH] Add spacing to status bar network speed
 
 ---
- res/layout/samsung_status_bar_network_speed_view.xml                    | 2 +-
- res/values/dimens.xml                                                   | 2 +-
- smali_classes3/com/android/systemui/statusbar/policy/NetspeedView.smali | 6 ++++++
- 3 files changed, 8 insertions(+), 2 deletions(-)
+ res/layout/samsung_status_bar_network_speed_view.xml | 2 +-
+ res/values/dimens.xml                                | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/res/layout/samsung_status_bar_network_speed_view.xml b/res/layout/samsung_status_bar_network_speed_view.xml
 index 3287a85aa..4dd364321 100644
@@ -33,22 +32,5 @@ index 245cfd6b0..25c67a444 100644
      <dimen name="new_qs_header_non_clickable_element_height">24.0sp</dimen>
      <dimen name="no_more_bubble_text_size">17.0sp</dimen>
      <dimen name="no_notification_shadow_radius">5.0dp</dimen>
-diff --git a/smali_classes3/com/android/systemui/statusbar/policy/NetspeedView.smali b/smali_classes3/com/android/systemui/statusbar/policy/NetspeedView.smali
-index 5f5e6ee18..7c9afe07f 100644
---- a/smali_classes3/com/android/systemui/statusbar/policy/NetspeedView.smali
-+++ b/smali_classes3/com/android/systemui/statusbar/policy/NetspeedView.smali
-@@ -394,6 +394,12 @@
-     add-int/2addr p1, v1
-
-     :cond_37
-+    invoke-virtual {p0}, Landroid/widget/LinearLayout;->getPaddingEnd()I
-+
-+    move-result v1
-+
-+    add-int/2addr p1, v1
-+
-     if-eq v0, p1, :cond_40
-
-     invoke-static {p2}, Landroid/view/View$MeasureSpec;->getSize(I)I
 -- 
 2.51.1
