@@ -61,6 +61,9 @@ PREPARE_SCRIPT()
         VERSION="$(grep "^version=" <<< "$TARGET_BUILD_INFO" | cut -d "=" -f 2 -s)"
         DEVICE="$(grep "^device=" <<< "$TARGET_BUILD_INFO" | cut -d "=" -f 2 -s)"
         SUFFIX="$(GET_PROP "system" "ro.build.PDA")"
+        if [ ! "$SUFFIX" ]; then
+            SUFFIX="$(grep "^build_incremental=" <<< "$TARGET_BUILD_INFO" | cut -d "=" -f 2 -s)"
+        fi
         OUTPUT_FILE="$OUT_DIR/$(GET_RELEASE_ZIP_NAME "$VERSION" "$DEVICE" "${SUFFIX: -4}")"
         if $INCREMENTAL; then
             local SOURCE_BUILD_INFO
