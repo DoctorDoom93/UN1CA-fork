@@ -201,9 +201,11 @@ SMALI_PATCH()
 
         LOG "- Nullifying method \"$METHOD\" in /$PARTITION/$FILE/$SMALI"
 
+        local AWK_RET=0
         awk -v FN="$METHOD" -v LOC="$LOC" -v RET="$RET" '
-            BEGIN { inside = 0 }
+            BEGIN { found = 0; inside = 0 }
             /^\.method/ && index($0, FN) {
+                found = 1
                 print
                 print "    " LOC
                 print "    "
@@ -218,14 +220,22 @@ SMALI_PATCH()
             }
             inside { next }
             { print }
-        ' "$FILE_PATH/$SMALI" > "$FILE_PATH/$SMALI.tmp" && \
-            mv "$FILE_PATH/$SMALI.tmp" "$FILE_PATH/$SMALI"
+            END {
+                if (!found) exit 2
+            }
+        ' "$FILE_PATH/$SMALI" > "$FILE_PATH/$SMALI.tmp" || AWK_RET=$?
 
-        AFTER="$(sha1sum "$FILE_PATH/$SMALI")"
-        if [[ "$BEFORE" == "$AFTER" ]]; then
+        if [[ $AWK_RET -eq 2 ]]; then
+            rm -f "$FILE_PATH/$SMALI.tmp"
+            LOGE "Method \"$METHOD\" not found in /$PARTITION/$FILE/$SMALI"
+            return 1
+        elif [[ $AWK_RET -ne 0 ]]; then
+            rm -f "$FILE_PATH/$SMALI.tmp"
             LOGE "Failed to nullify method \"$METHOD\" in /$PARTITION/$FILE/$SMALI"
             return 1
         fi
+
+        mv "$FILE_PATH/$SMALI.tmp" "$FILE_PATH/$SMALI"
     # Replace the method contents with a single return
     elif [[ "$OPERATION" == "return" ]]; then
         local RET
@@ -327,9 +337,11 @@ SMALI_PATCH()
 
         LOG "- Replacing return value of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI to \"$VALUE\""
 
+        local AWK_RET=0
         awk -v FN="$METHOD" -v LOC="$LOC" -v VAL="$VALUE" -v RET="$RET" '
-            BEGIN { inside = 0 }
+            BEGIN { found = 0; inside = 0 }
             /^\.method/ && index($0, FN) {
+                found = 1
                 print
                 print "    " LOC
                 print ""
@@ -346,14 +358,22 @@ SMALI_PATCH()
             }
             inside { next }
             { print }
-        ' "$FILE_PATH/$SMALI" > "$FILE_PATH/$SMALI.tmp" && \
-            mv "$FILE_PATH/$SMALI.tmp" "$FILE_PATH/$SMALI"
+            END {
+                if (!found) exit 2
+            }
+        ' "$FILE_PATH/$SMALI" > "$FILE_PATH/$SMALI.tmp" || AWK_RET=$?
 
-        AFTER="$(sha1sum "$FILE_PATH/$SMALI")"
-        if [[ "$BEFORE" == "$AFTER" ]]; then
+        if [[ $AWK_RET -eq 2 ]]; then
+            rm -f "$FILE_PATH/$SMALI.tmp"
+            LOGE "Method \"$METHOD\" not found in /$PARTITION/$FILE/$SMALI"
+            return 1
+        elif [[ $AWK_RET -ne 0 ]]; then
+            rm -f "$FILE_PATH/$SMALI.tmp"
             LOGE "Failed to replace return value of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI to \"$VALUE\""
             return 1
         fi
+
+        mv "$FILE_PATH/$SMALI.tmp" "$FILE_PATH/$SMALI"
     # Replace a string with another string inside the method
     # or Replace a line with another line inside the method
     elif [[ "$OPERATION" == "replace" ]]; then
