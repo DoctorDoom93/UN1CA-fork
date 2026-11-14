@@ -150,8 +150,14 @@ if [ "$SOURCE_CAMERA_CONFIG_ACTION_CLASSIFIER" ]; then
     fi
 else
     if [ "$TARGET_CAMERA_CONFIG_ACTION_CLASSIFIER" ]; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_CAMERA_CONFIG_ACTION_CLASSIFIER" "TARGET_CAMERA_CONFIG_ACTION_CLASSIFIER"
+        if [ -d "$FW_DIR/$TARGET_FIRMWARE_PATH/vendor/etc/singletake/dynamic_viewing" ]; then
+            if [ -d "$WORK_DIR/vendor/etc/singletake/dynamic_viewing" ]; then
+                DELETE_FROM_WORK_DIR "vendor" "etc/singletake/dynamic_viewing"
+            fi
+            ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "vendor" "etc/singletake/dynamic_viewing" 0 2000 755 "u:object_r:vendor_configs_file:s0"
+        elif [ ! -d "$WORK_DIR/vendor/etc/singletake/dynamic_viewing" ]; then
+            SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_ACTION_CLASSIFIER" --delete
+        fi
     fi
 fi
 
