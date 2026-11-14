@@ -68,6 +68,9 @@ EXTRACT_OS_PARTITIONS()
 
     if FILE_EXISTS_IN_TAR "$AP_TAR" "super.img" || FILE_EXISTS_IN_TAR "$AP_TAR" "super.img.lz4"; then
         EXTRACT_FILE_FROM_TAR "$AP_TAR" "super.img" || exit 1
+        if [ -n "$GITHUB_ACTIONS" ]; then
+            rm -rf "$ODIN_DIR/${MODEL}_${CSC}"
+        fi
         UNSPARSE_IMAGE "$FW_DIR/${MODEL}_${CSC}/super.img" || exit 1
 
         LOG "- Unpacking super.img..."
@@ -93,6 +96,9 @@ EXTRACT_OS_PARTITIONS()
             UNSPARSE_IMAGE "$FW_DIR/${MODEL}_${CSC}/$f" || exit 1
             STORE_OS_PARTITION_METADATA "$FW_DIR/${MODEL}_${CSC}/$f"
         done
+        if [ -n "$GITHUB_ACTIONS" ]; then
+            rm -rf "$ODIN_DIR/${MODEL}_${CSC}"
+        fi
     fi
 
     local PARTITION
@@ -403,9 +409,9 @@ for i in "${FIRMWARES[@]}"; do
         exit 1
     fi
 
+    EXTRACT_AVB_BINARIES
     EXTRACT_KERNEL_BINARIES
     EXTRACT_OS_PARTITIONS
-    EXTRACT_AVB_BINARIES
 
     echo -n "$DOWNLOADED_FIRMWARE" > "$FW_DIR/${MODEL}_${CSC}/.extracted"
 
