@@ -46,20 +46,37 @@ UPDATE_BLOBS()
         FILE_PATH="$PREBUILTS_DIR/${i//system\/system\//system/}"
 
         if [ ! -f "$FW_DIR/${MODEL}_${CSC}/$i" ]; then
-            LOGE "File not found: ${FW_DIR//$SRC_DIR\//}/${MODEL}_${CSC}/$i"
-            exit 1
+            local ALT_FILE
+            ALT_FILE="$(find "$FW_DIR/${MODEL}_${CSC}" -type f -name "$(basename "$i")" 2>/dev/null | head -n 1)"
+            if [ -n "$ALT_FILE" ] && [ -f "$ALT_FILE" ]; then
+                LOG "! File moved in firmware: using $ALT_FILE instead of $i"
+                rm -f "$FILE_PATH" "$FILE_PATH."*
+                i="${ALT_FILE#$FW_DIR/${MODEL}_${CSC}/}"
+                FILE_PATH="$PREBUILTS_DIR/${i//system\/system\//system/}"
+                mkdir -p "$(dirname "$FILE_PATH")"
+            elif [ ! -s "$FILE_PATH" ]; then
+                LOG "! 0-byte placeholder not found in firmware, removing: $FILE_PATH"
+                rm -f "$FILE_PATH"
+                continue
+            else
+                LOGE "File not found: ${FW_DIR//$SRC_DIR\//}/${MODEL}_${CSC}/$i"
+                exit 1
+            fi
         fi
 
         LOG "- Updating prebuilts/samsung/$DEVICE/$i"
 
         if [ ! -L "$FW_DIR/${MODEL}_${CSC}/$i" ] && \
                 [ "$(wc -c "$FW_DIR/${MODEL}_${CSC}/$i" | cut -d " " -f 1)" -gt "52428800" ]; then
-            EVAL "rm \"$FILE_PATH.\"*" || exit 1
+            EVAL "rm -f \"$FILE_PATH\" \"$FILE_PATH.\"*" || exit 1
             EVAL "split -d -b 52428800 \"$FW_DIR/${MODEL}_${CSC}/$i\" \"$FILE_PATH.\"" || exit 1
         else
+            EVAL "rm -f \"$FILE_PATH.\"*" || exit 1
             EVAL "cp -a \"$FW_DIR/${MODEL}_${CSC}/$i\" \"$FILE_PATH\"" || exit 1
         fi
     done
+
+    find "$PREBUILTS_DIR" -type d -empty -delete 2>/dev/null || true
 
     EVAL "cp -a \"$FW_DIR/${MODEL}_${CSC}/.extracted\" \"$PREBUILTS_DIR/.current\"" || exit 1
 }
