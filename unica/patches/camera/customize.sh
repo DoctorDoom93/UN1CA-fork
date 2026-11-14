@@ -240,8 +240,12 @@ if [[ "$SOURCE_GALLERY_CONFIG_PET_CLUSTER_VERSION" != "None" ]]; then
     fi
 else
     if [[ "$TARGET_GALLERY_CONFIG_PET_CLUSTER_VERSION" != "None" ]]; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_GALLERY_CONFIG_PET_CLUSTER_VERSION" "TARGET_GALLERY_CONFIG_PET_CLUSTER_VERSION"
+        if [ -f "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/priv-app/PetService/PetService.apk" ]; then
+            ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/priv-app/PetService" 0 0 755 "u:object_r:system_file:s0"
+            ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libPetClustering.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+        else
+            SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_PET_CLUSTER_VERSION" "None"
+        fi
     fi
 fi
 
@@ -260,8 +264,11 @@ if [[ "$SOURCE_SAIV_CONFIG_ARDOODLE_LIB" != "$TARGET_SAIV_CONFIG_ARDOODLE_LIB" ]
         fi
     else
         if [ "$TARGET_SAIV_CONFIG_ARDOODLE_LIB" ]; then
-            # TODO handle this condition
-            LOG_MISSING_PATCHES "SOURCE_SAIV_CONFIG_ARDOODLE_LIB" "TARGET_SAIV_CONFIG_ARDOODLE_LIB"
+            if [ -d "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/ardoodle" ]; then
+                ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/ardoodle" 0 0 755 "u:object_r:system_file:s0"
+            else
+                SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_SAIV_CONFIG_ARDOODLE_LIB" --delete
+            fi
         fi
     fi
 fi
