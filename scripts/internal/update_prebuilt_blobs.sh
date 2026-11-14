@@ -59,8 +59,8 @@ UPDATE_BLOBS()
                 rm -f "$FILE_PATH"
                 continue
             else
-                LOGE "File not found: ${FW_DIR//$SRC_DIR\//}/${MODEL}_${CSC}/$i"
-                exit 1
+                LOG "! File not found in firmware, preserving existing prebuilt blob: $i"
+                continue
             fi
         fi
 
@@ -76,7 +76,8 @@ UPDATE_BLOBS()
         fi
     done
 
-    find "$PREBUILTS_DIR" -type d -empty -delete 2>/dev/null || true
+    find "$PREBUILTS_DIR" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+    mkdir -p "$PREBUILTS_DIR"
 
     EVAL "cp -a \"$FW_DIR/${MODEL}_${CSC}/.extracted\" \"$PREBUILTS_DIR/.current\"" || exit 1
 }
