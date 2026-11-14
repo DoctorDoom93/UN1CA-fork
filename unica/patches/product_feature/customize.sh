@@ -321,11 +321,21 @@ if [[ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "$TARGET_FINGERPRINT_CONFIG_SENSOR"
                     ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libui.so" 0 0 644 "u:object_r:system_lib_file:s0"
                     ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib64/libgui.so" 0 0 644 "u:object_r:system_lib_file:s0"
                     ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib64/libui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+                elif [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "mssi" ]]; then
+                    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/bin/surfaceflinger" 0 2000 755 "u:object_r:surfaceflinger_exec:s0"
+                    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libgui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+                    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+                    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libgui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+                    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libui.so" 0 0 644 "u:object_r:system_lib_file:s0"
                 else
                     ABORT "Unknown SSI: $TARGET_OS_SINGLE_SYSTEM_IMAGE"
                 fi
 
-                ADD_TO_WORK_DIR "r9qxxx" "system" "system/priv-app/BiometricSetting/BiometricSetting.apk" 0 0 644 "u:object_r:system_file:s0"
+                if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "mssi" ]]; then
+                    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/priv-app/BiometricSetting/BiometricSetting.apk" 0 0 644 "u:object_r:system_file:s0"
+                else
+                    ADD_TO_WORK_DIR "r9qxxx" "system" "system/priv-app/BiometricSetting/BiometricSetting.apk" 0 0 644 "u:object_r:system_file:s0"
+                fi
 
                 APPLY_PATCH "system" "system/framework/framework.jar" \
                     "$MODPATH/fingerprint/optical_fod/framework.jar/0001-Add-optical-FOD-support.patch"

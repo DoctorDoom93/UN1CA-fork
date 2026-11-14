@@ -1,5 +1,8 @@
 <?xml version= "1.0" encoding= "UTF-8"?>
 <resources>
+	<!-- Single take Full/Lite version -->
+	<local name="ENABLE_SINGLE_TAKE_LITE" value="true"  />
+
 	<!-- STP -->
 	<local name="PREVIEW_BUFFER_POOL_SIZE" value="10"  />
 	<local name="MASTER_BUFFER_POOL_SIZE" value="2"  />
@@ -17,12 +20,12 @@
 	<local name="SUPPORT_LOWER_THRESHOLD_BM" value="true"  />
 	
 	<!-- ESTPP -->
-	<local name="SUPPORT_PET_DETECTION" value="true"  />
+	<local name="SUPPORT_PET_DETECTION" value="false"  />
 	
 	<!-- STC -->
 	<local name="SUPPORT_SINGLE_BOKEH_PROCESSING" value="false"  />
 	<local name="SUPPORT_BEAUTY_PROCESSING" value="false"  />
-	<local name="SUPPORT_AI_FILTER" value="true"  />
+	<local name="SUPPORT_AI_FILTER" value="false"  />
 	<local name="SUPPORT_SMART_CROP" value="true"  />
 	<local name="SINGLE_TAKE_LITE_USE_CAMERA_FILTERS" value="true"  />
 	<local name="HIDT_VIDEO_DURATION" value="6"  />
@@ -38,10 +41,6 @@
 	<local name="VIDEO_GENERATION_PARALLEL_ENABLE" value="false"  />
 	<local name="PHOTO_MAPPER_VERSION" value="3"  />
 	<local name="VIDEO_MAPPER_VERSION" value="3"  />
-
-	<!-- ST1.5 features  -->
+	<!-- ST1.5 features -->
 	<local name="SUPPORT_COLLAGE" value="true"  />
-	<local name="VIDEO_GENERATION_HIGHLIGHTS_VIDEO" value="true"  />
-	<local name="ENABLE_HV_LITE" value="true"  />
-	<local name="ENABLE_HIGHLIGHT_VIDEO_CUSTOMIZATION" value="true"  />
 </resources>

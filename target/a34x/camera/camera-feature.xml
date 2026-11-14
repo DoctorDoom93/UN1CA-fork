@@ -87,6 +87,14 @@
     <!-- Quick launch features -->
     <local name="CAMERA_QUICK_LAUNCH_USING_POWER_KEY" value="true"/>
 
+    <!-- camera assistant features -->
+    <local name="SUPPORT_CAMERA_ASSISTANT" value="true"/>
+    <local name="SUPPORT_CAMERA_ASSISTANT_ADDITIONAL_MODE_SINGLE_TAKE" value="true"/>
+    <local name="SUPPORT_CAMERA_ASSISTANT_CUSTOMIZE_INDICATORS" value="true"/>
+    <local name="SUPPORT_CAMERA_ASSISTANT_OPTICAL_IMAGE_STABILIZATION" value="true"/>
+    <local name="SUPPORT_CAMERA_ASSISTANT_PRO_MODE_PRESETS" value="true"/>
+    <local name="SUPPORT_CAMERA_ASSISTANT_TOUCH_AF_AE_IN_PRO_VIDEO_MODE" value="true"/>
+
     <!-- Multi-camera features -->
     <local name="SUPPORT_BACK_DUAL_PORTRAIT" value="true"/>
     <local name="SUPPORT_BACK_WIDE_NORMAL_DUAL_PORTRAIT" value="true"/>
@@ -171,8 +179,6 @@
     <local name="SINGLE_TAKE_PHOTO_LOW_PERFORMANCE" value="true" />
     <local name="SUPPORT_SINGLE_TAKE_COLLAGES" value="true" />
 	<local name="SUPPORT_SINGLE_TAKE_MULTI_CAMERA" value="false" />
-    <local name="SUPPORT_SINGLE_TAKE_HIGHLIGHT_VIDEOS" value="true" />
-    <local name="SUPPORT_SINGLE_TAKE_EXTENDED_CAPTURE" value="true" />
 
     <!-- Etc. features -->
     <local name="SUPPORT_PRO_AE_PRIORITY_MODE" value="true" />
@@ -186,6 +192,11 @@
     <local name="SUPPORT_SENSOR_CROP" value="true"/>
     <local name="SUPPORT_ADDITIONAL_SCENE_DOCUMENT_SCAN" value="true" />
     <local name="SUPPORT_SMART_SCAN_MANUAL_CROP" value="true" />
+    <local name="LIMITATION_SUPER_SLOWMOTION_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_SLOWMOTION_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_UHD_RECORDING_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_FHD_60FPS_RECORDING_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_FHD_RECORDING_DURING_SMARTVIEW" value="true" />
     <local name="SUPPORT_NIGHT_MODE_REAR_LENS" value="true" />
     <local name="SUPPORT_NIGHT_MODE_FRONT_ANGLE" value="true" />
     <local name="SUPPORT_RECORDING_LENS_CHANGE" value="true" />
@@ -208,6 +219,12 @@
     <local name="SUPPORT_MOON_NIGHT_VI_IPP" value="true" />
     <local name="SUPPORT_PHOTO_NIGHT" value="true"/>
     <local name="SUPPORT_NIGHT_MODE_ZOOM" value="true" />
+	<local name="LIMITATION_1BY1_RECORDING_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_FHD_RECORDING_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_FULL_RECORDING_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_SLOWMOTION_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_UHD_RECORDING_DURING_SMARTVIEW" value="true" />
+    <local name="LIMITATION_VIDEO_RECORDING_DURING_SMARTVIEW" value="true" />
     <local name="LIMITATION_DS_MODE_UPDATE_DELAY" value="true" />
 	<local name="SUPPORT_QUICK_VIEW_SCALE_VI" value="true"/>
 
@@ -221,7 +238,5 @@
     <local name="SUPPORT_VIDEO_AUTO_FRAMING" value="true" />
     <local name="SUPPORT_FRONT_VIDEO_AUTO_FRAMING" value="true" />
     <local name="SUPPORT_BACK_VIDEO_AUTO_FRAMING" value="true" />
-
-    <!-- camera assistant features -->
-    <local name="SUPPORT_CAMERA_ASSISTANT" value="true"/>
+	
 </resources>
