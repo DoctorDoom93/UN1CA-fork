@@ -91,7 +91,7 @@ jobs:
             -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
             7zip attr ccache clang curl ffmpeg jq libbrotli-dev libbz2-dev \
             libgtest-dev libprotobuf-dev libunwind-dev libpcre2-dev \
-            libzstd-dev lld protobuf-compiler webp
+            libzstd-dev lld protobuf-compiler webp xxd
           sudo modprobe erofs 2>/dev/null || true
           sudo modprobe f2fs 2>/dev/null || true
           git config --global user.name "github-actions[bot]"
