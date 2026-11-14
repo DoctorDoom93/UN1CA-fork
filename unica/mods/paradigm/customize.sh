@@ -13,6 +13,7 @@ fi
 # 2025 Audio Pack
 LOG_STEP_IN "- Adding 2025 Audio Pack"
 DELETE_FROM_WORK_DIR "system" "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.mp3"
+DELETE_FROM_WORK_DIR "system" "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.m4a"
 ADD_TO_WORK_DIR "pa2qxxx" "system" \
     "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.m4a" 0 0 644 "u:object_r:system_file:s0"
 DELETE_FROM_WORK_DIR "system" "system/media/audio/notifications"
@@ -71,15 +72,98 @@ else
 fi
 APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
     "$MODPATH/ead/SettingsProvider.apk/0001-Add-Adaptive-color-tone-feature.patch"
+
+DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk"
+SOURCE_FILE_ATTR="$(grep -F ".source" "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/smali/base/packages/SystemUI/samsung/compose_qs/src/com/android/systemui/samsung/quicksetting/ui/tiles/MultiSIMPreferredPopupKt.smali" 2>/dev/null || echo "")"
+if [ "$SOURCE_FILE_ATTR" ]; then
+    SOURCE_FILE_ATTR="${SOURCE_FILE_ATTR//\./\\.}"
+    SOURCE_FILE_ATTR="${SOURCE_FILE_ATTR//\"/\\\"}"
+    SOURCE_FILE_ATTR="${SOURCE_FILE_ATTR//\//\\/}"
+    LOG "- Replacing SourceFile attribute in /system_ext/priv-app/SystemUI/SystemUI.apk"
+    find "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk" -type f -name "*.smali" -print0 \
+        | xargs -0 -I "{}" -P "$(nproc)" sed -i "s/^\.source.*/\.source \"SourceFile\"/g" "{}"
+fi
 APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
     "$MODPATH/ead/SystemUI.apk/0001-Add-Adaptive-color-tone-toggle.patch"
+if [ "$SOURCE_FILE_ATTR" ]; then
+    LOG "- Restoring original SourceFile attribute in /system_ext/priv-app/SystemUI/SystemUI.apk"
+    find "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk" -type f -name "*.smali" -print0 \
+        | xargs -0 -I "{}" -P "$(nproc)" sed -i "s/^\.source.*/$SOURCE_FILE_ATTR/g" "{}"
+fi
 LOG_STEP_OUT
 
 # Set AI Version to 20253 (latest)
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_CONFIG_AI_VERSION" "20253"
-ADD_TO_WORK_DIR "pa2qxxx" "system" "system/app/SketchBook/SketchBook.apk" 0 0 644 "u:object_r:system_file:s0"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_DISABLE_NATIVE_AI" --delete
 
-# Media Context Analyzer
+SMALI_PATCH "system" "system/framework/framework.jar" "smali_classes6/com/samsung/android/rune/CoreRune.smali" "return" "getAIVersion()I" "20253"
+
+# Miscs
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libC2paDps.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+
+LOG_STEP_IN "- Adding missing flagship apps and services"
+
+# AI Wallpaper
+ADD_TO_WORK_DIR "b7sxxx" "product" "priv-app/AiWallpaper/AiWallpaper.apk" 0 0 644 "u:object_r:system_file:s0"
+
+# AI Core
+ADD_TO_WORK_DIR "b7sxxx" "product" "priv-app/AICore/AICore.apk" 0 0 644 "u:object_r:system_file:s0"
+
+# Android Glasses
+ADD_TO_WORK_DIR "b7sxxx" "product" "priv-app/AndroidGlassesCore/AndroidGlassesCore.apk" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "product" "etc/sysconfig/google_xr_projected.xml" 0 0 644 "u:object_r:system_file:s0"
+
+# Tips
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/default-permissions/default-permissions-com.samsung.android.app.tips.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/privapp-permissions-com.samsung.android.app.tips.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/signature-permissions-com.samsung.android.app.tips.xml" 0 0 644 "u:object_r:system_file:s0"
+if ! grep -q 'com.samsung.android.app.tips' "$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml" 2>/dev/null; then
+    if [ -f "$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml" ]; then
+        sed -i "/<\/config>/d" "$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml"
+        echo "    <allowed-system-preload package=\"com.samsung.android.app.tips\"/>"  >> "$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml"
+        echo "</config>" >> "$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml"
+    fi
+fi
+
+# SketchBook
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/app/SketchBook/SketchBook.apk" 0 0 644 "u:object_r:system_file:s0"
+
+# Live Effect Wallpaper
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/LiveEffectService/LiveEffectService.apk" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/privapp-permissions-com.samsung.android.liveeffectservice.xml" 0 0 644 "u:object_r:system_file:s0"
+
+# AI-release SmartCapture
+DELETE_FROM_WORK_DIR "system" "system/app/SmartCapture"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/app/SmartCapture/SmartCapture.apk" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libAuraRenderer.graphics.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libLttEngine.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libLttAIEngines.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -f "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt" ] && ! grep -q "libLttEngine.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+    echo "libLttEngine.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+fi
+
+# Bixby Interpreter
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/BixbyInterpreter/BixbyInterpreter.apk" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/signature-permissions-com.samsung.android.app.interpreter.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/privapp-permissions-com.samsung.android.app.interpreter.xml" 0 0 644 "u:object_r:system_file:s0"
+if [ ! "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_AUDIO_CONFIG_INTERPRETER")" ]; then
+    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_AUDIO_CONFIG_INTERPRETER" "0"
+fi
+
+# Camera Sharing
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/privapp-permissions-com.samsung.android.hwresourceshare.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/sysconfig/preinstalled-packages-com.samsung.android.hwresourceshare.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/HWResourceShare/HWResourceShare.apk" 0 0 644 "u:object_r:system_file:s0"
+
+# AI-release PhotoEditor
+DELETE_FROM_WORK_DIR "system" "system/priv-app/PhotoEditor_Full"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" 0 0 644 "u:object_r:system_file:s0"
+# Enable text-based create tab, part of 20261 Galaxy AI features
+SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "smali_classes4/K1/c.smali" "replace" "D()V" "move-result v0" "const/16 v0, 0x4f25"
+
+LOG_STEP_OUT
+
+# Media Context Analyzer and VideoClassifier (V2)
 LOG_STEP_IN "- Adding Media Context Analyzer feature"
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/mediacontextanalyzer/Detection.tflite" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/mediacontextanalyzer/human-pet-det_SR-V131.tflite" 0 0 644 "u:object_r:system_file:s0"
@@ -93,6 +177,11 @@ ADD_TO_WORK_DIR "a56xnaxx" "system" "system/lib64/libmediacontextanalyzer.so" 0 
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/lib64/libvideo-highlight-arm64-v8a.so" 0 0 644 "u:object_r:system_lib_file:s0"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_MMFW_CONFIG_MEDIA_CONTEXT_ANALYZER_CORE" "GPU"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_MMFW_SUPPORT_MEDIA_CONTEXT_ANALYZER" "TRUE"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libVideoClassifier.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -f "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt" ] && ! grep -q "libVideoClassifier.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+    echo "libVideoClassifier.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+fi
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_ACTION_CLASSIFIER" "1,0"
 LOG_STEP_OUT
 
 # Audio eraser
@@ -125,49 +214,154 @@ ADD_TO_WORK_DIR "pa2qxxx" "system" \
 ADD_TO_WORK_DIR "pa2qxxx" "system" "system/priv-app/Moments/Moments.apk" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "$MODPATH" "system" \
     "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" 0 0 644 "u:object_r:system_file:s0"
-# HACK [
-# Samsung has released an update for the Smart suggestions app in March 2026.
-# The versioning of the "basic-global-release" flavor differs from the "full-global-release" one.
-# This is done on purpose: Samsung uses a lower version number to avoid installing this variant
-# on unsupported devices by triggering the downgrade check in PM. To avoid users updating to the
-# "non-AI" app, let's fake the versionCode so that it matches the latest available version.
 DECODE_APK "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk"
 LOG "- Patching versionCode in SamsungSmartSuggestions.apk"
 EVAL "sed -i \"s/710500000/711100100/g\" \"$APKTOOL_DIR/system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk/apktool.yml\""
-# ]
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_PERSONALIZED_DATA_CORE" "TRUE"
+LOG_STEP_OUT
+
+# Media Search
+LOG_STEP_IN "- Adding Media Search feature"
+ADD_TO_WORK_DIR "pa2qxxx" "system" \
+    "system/etc/default-permissions/default-permissions-com.samsung.mediasearch.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "pa2qxxx" "system" \
+    "system/etc/permissions/privapp-permissions-com.samsung.mediasearch.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "pa2qxxx" "system" \
+    "system/priv-app/MediaSearch/MediaSearch.apk" 0 0 644 "u:object_r:system_file:s0"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_MSCH_SUPPORT_NLSEARCH" "TRUE"
+LOG_STEP_OUT
+
+# Pet + Face 2-in-1 Clustering
+LOG_STEP_IN "- Adding Face and Pet Cluster feature"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/default-permissions/default-permissions-com.samsung.petservice.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/permissions/privapp-permissions-com.samsung.petservice.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/PetService/PetService.apk" 0 0 644 "u:object_r:system_file:s0"
+if [ -d "$WORK_DIR/system/system/saiv/face/cluster_pb" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/saiv/face/cluster_pb"
+fi
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/saiv/face/cluster_pb" 0 0 755 "u:object_r:system_file:s0"
+DELETE_FROM_WORK_DIR "system" "system/lib64/libsaiv_HprFace_cmh_support_jni.camera.samsung.so"
+DELETE_FROM_WORK_DIR "system" "system/lib64/libHpr_RecFace_dl_v1.0.camera.samsung.so"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libFace_Landmark_Engine.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libFaceClustering.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -f "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt" ]; then
+    if ! grep -q "libFace_Landmark_Engine.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+        echo "libFace_Landmark_Engine.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+    fi
+    if ! grep -q "libFaceClustering.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+        echo "libFaceClustering.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+    fi
+fi
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_FACE_CLUSTER_VERSION" "SR_V7"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_PET_CLUSTER_VERSION" "V1101"
+LOG_STEP_OUT
+
+# Flagship Image Tagger algorithm
+LOG_STEP_IN "- Adding flagship Image Tagger feature"
+ADD_TO_WORK_DIR "gts9fexx" "system" "system/lib64/libImageTagger.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -f "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt" ] && ! grep -q "libImageTagger.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+    echo "libImageTagger.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+fi
+if [ -d "$WORK_DIR/vendor/saiv/image_understanding/db/aig_classifier" ]; then
+    DELETE_FROM_WORK_DIR "vendor" "saiv/image_understanding/db/aig_classifier"
+fi
+ADD_TO_WORK_DIR "gts9fexx" "vendor" "saiv/image_understanding/db/aig_classifier" 0 2000 755 "u:object_r:vendor_snap_file:s0"
+if [ -d "$WORK_DIR/vendor/saiv/image_understanding/db/aig_detector" ]; then
+    DELETE_FROM_WORK_DIR "vendor" "saiv/image_understanding/db/aig_detector"
+fi
+if [ -d "$WORK_DIR/vendor/saiv/image_understanding/db/aig_document_classifier" ]; then
+    DELETE_FROM_WORK_DIR "vendor" "saiv/image_understanding/db/aig_document_classifier"
+fi
+ADD_TO_WORK_DIR "gts9fexx" "vendor" "saiv/image_understanding/db/aig_document_classifier" 0 2000 755 "u:object_r:vendor_snap_file:s0"
+if [ -d "$WORK_DIR/vendor/saiv/image_understanding/db/aig_document_detector" ]; then
+    DELETE_FROM_WORK_DIR "vendor" "saiv/image_understanding/db/aig_document_detector"
+fi
+ADD_TO_WORK_DIR "gts9fexx" "vendor" "saiv/image_understanding/db/aig_document_detector" 0 2000 755 "u:object_r:vendor_snap_file:s0"
+if [ -d "$WORK_DIR/vendor/saiv/image_understanding/db/srr_interaction" ]; then
+    DELETE_FROM_WORK_DIR "vendor" "saiv/image_understanding/db/srr_interaction"
+fi
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION" "V901"
+LOG_STEP_OUT
+
+# Flagship Text OCR
+LOG_STEP_IN "- Adding flagship Text Recognition"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libStride.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libStrideTensorflowLite.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -f "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt" ]; then
+    if ! grep -q "libStrideTensorflowLite.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+        echo "libStrideTensorflowLite.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+    fi
+    if ! grep -q "libStride.camera.samsung.so" "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"; then
+        echo "libStride.camera.samsung.so" >> "$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+    fi
+fi
+if [ -d "$WORK_DIR/system/system/saiv/textrecognition" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/saiv/textrecognition"
+fi
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/saiv/textrecognition" 0 0 755 "u:object_r:system_file:s0"
+if [ -d "$WORK_DIR/system/system/saiv/str" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/saiv/str"
+fi
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/saiv/str" 0 0 755 "u:object_r:system_file:s0"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_STRIDE_OCR_VERSION" "V2"
+LOG_STEP_OUT
+
+# ARDoodle and Pet Detection
+LOG_STEP_IN "- Adding enhanced AR Doodle"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/lib_pet_detection.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -f "$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt" ] && ! grep -q "lib_pet_detection.arcsoft.so" "$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt"; then
+    echo "lib_pet_detection.arcsoft.so" >> "$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt"
+fi
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/etc/ardoodle/pickingsegmentation.tflite" 0 0 644 "u:object_r:system_lib_file:s0"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_SAIV_CONFIG_ARDOODLE_LIB" "PET_DETECTION,IMG_PICKING"
+LOG_STEP_OUT
+
+# Flagship MyFilter
+LOG_STEP_IN "- Adding flagship Camera Filters support"
+DELETE_FROM_WORK_DIR "system" "system/lib64/libtensorflowLite.myfilter.camera.samsung.so"
+DELETE_FROM_WORK_DIR "system" "system/lib64/libtensorflowlite_inference_api.myfilter.camera.samsung.so"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/lib64/libMyFilter.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [ -d "$WORK_DIR/cameradata/myfilter" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/cameradata/myfilter"
+fi
+if [ -d "$WORK_DIR/cameradata/preloadfilters" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/cameradata/preloadfilters"
+fi
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/cameradata/myfilter" 0 0 755 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "b7sxxx" "system" "system/cameradata/preloadfilters" 0 0 755 "u:object_r:system_lib_file:s0"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_MYFILTER" "1,3,4"
+LOG_STEP_OUT
+
+# Misc Floating Feature
+LOG_STEP_IN "- Enabling Misc features"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_SAIV_SUPPORT_3DPHOTO" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_PRIVACY_TOGGLE" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_SUPPORT_SPC_LOCATION_POI" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_LAUNCHER_CONFIG_ANIMATION_TYPE" "HighEnd"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_VISION_CONFIG_IMAGE_TRANSLATION_OVERLAY_VERSION" "5"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_CONTROLLING_WATCH" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_SMART_VIEW_APP_CAST_SUPPORTED" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_VISION_SUPPORT_AI_MY_FAVORITE_CONTENTS" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_SYSTEMUI_CONFIG_EDGELIGHTING_FRAME_EFFECT" "frame_effect"
+if [[ "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_VOICERECORDER_CONFIG_DEF_MODE")" != *"voicememo"* ]]; then
+  SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_VOICERECORDER_CONFIG_DEF_MODE" "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_VOICERECORDER_CONFIG_DEF_MODE"),voicememo"
+fi
 LOG_STEP_OUT
 
 # Semantic search
 # Requires SEC_FLOATING_FEATURE_COMMON_CONFIG_AI_VERSION >= 20251
 LOG_STEP_IN "- Adding Semantic search feature"
 ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/default-permissions/default-permissions-com.samsung.mediasearch.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/mediasearch/data/dec_adaptor.tflite" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/mediasearch/data/dec_event.tflite" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/mediasearch/data/enc_image.tflite" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/mediasearch/data/enc_text.tflite" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/mediasearch/data/versioninfo.json" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/permissions/privapp-permissions-com.samsung.mediasearch.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/priv-app/MediaSearch/MediaSearch.apk" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
     "system/priv-app/SemanticSearchCore/SemanticSearchCore.apk" 0 0 644 "u:object_r:system_file:s0"
 DECODE_APK "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
 LOG "- Enabling Semantic search feature in /system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
 EVAL "cp -a \"$MODPATH/semanticsearch/SecSettingsIntelligence.apk/res/raw/\"* \"$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/res/raw\""
 SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
-    "smali_classes2/com/samsung/android/settings/intelligence/Rune.smali" "replaceall" \
-    "const-string v1, \\\"\\\"" \
-    "const-string v1, \\\"400\\\"" \
-    > /dev/null
-SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_MSCH_SUPPORT_NLSEARCH" "TRUE"
+    "smali_classes2/com/samsung/android/settings/intelligence/Rune.smali" "return" "getSemanticSearchVersion()I" "400"
+SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
+    "smali_classes2/com/samsung/android/settings/intelligence/Rune.smali" "return" "getSupportSearchInAppAssist()Z" "true"
+SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
+    "smali_classes2/com/samsung/android/settings/intelligence/Utils.smali" "return" "isNPUVersion()Z" "false"
 LOG_STEP_OUT
 
 # Game Booster
