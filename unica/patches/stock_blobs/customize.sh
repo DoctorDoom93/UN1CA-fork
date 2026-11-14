@@ -104,7 +104,7 @@ if [ -f "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/priv-app/SohService/SohServ
     DECODE_APK "system" "system/priv-app/SohService/SohService.apk"
 
     LOG "- Adding target BSOH blobs"
-    EVAL "rm -r \"$APKTOOL_DIR/system/priv-app/SohService/SohService.apk/assets\""
+    EVAL "rm -rf \"$APKTOOL_DIR/system/priv-app/SohService/SohService.apk/assets\""
     EVAL "unzip -q \"$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/priv-app/SohService/SohService.apk\" \"assets/*\" -d \"$APKTOOL_DIR/system/priv-app/SohService/SohService.apk\""
 else
     if [ -f "$WORK_DIR/system/system/priv-app/SohService/SohService.apk" ]; then
