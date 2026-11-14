@@ -21,11 +21,19 @@ on:
       - 'a34x-baseline'
       - 'main'
       - 'sixteen'
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/blobs.yml'
+      - 'prebuilts/**'
   pull_request:
     branches:
       - 'a34x-baseline'
       - 'main'
       - 'sixteen'
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/blobs.yml'
+      - 'prebuilts/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

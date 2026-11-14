@@ -1,0 +1,168 @@
+name: Update prebuilt blobs
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_device:
+        description: 'Device to update (or "all" for all devices)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'b7sxxx'
+          - 'gts9fexx'
+          - 'gts11xx'
+          - 'e1sxxx'
+          - 'a56xnaxx'
+          - 'pa2qxxx'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: ${{ matrix.module }}
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module: "Galaxy S24 FE (b7sxxx)"
+            device: "b7sxxx"
+            firmware: "SM-S721B/EUX/358976191234561"
+          - module: "Galaxy Tab S9 FE 5G (gts9fexx)"
+            device: "gts9fexx"
+            firmware: "SM-X516B/EUX/354136921234567"
+          - module: "Galaxy Tab S11 5G (gts11xx)"
+            device: "gts11xx"
+            firmware: "SM-X736B/EUX/R52Y8065XJM"
+          - module: "Galaxy S24 (e1sxxx)"
+            device: "e1sxxx"
+            firmware: "SM-S921B/EUX/356391441234562"
+          - module: "Galaxy A56 5G (a56xnaxx)"
+            device: "a56xnaxx"
+            firmware: "SM-A566B/EUX/353240891234563"
+          - module: "Galaxy S25 (pa2qxxx)"
+            device: "pa2qxxx"
+            firmware: "SM-S936B/EUX/356972271234564"
+
+    steps:
+      - name: Check if device should be updated
+        id: filter
+        run: |
+          if [ "${{ inputs.target_device }}" != "all" ] && [ "${{ inputs.target_device }}" != "${{ matrix.device }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repo
+        if: steps.filter.outputs.skip == 'false'
+        uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Compare latest version with current version
+        if: steps.filter.outputs.skip == 'false'
+        run: |
+          need_update=0
+          CSC="$(echo ${{ matrix.firmware }} | cut -d'/' -f 2)"
+          MODEL="$(echo ${{ matrix.firmware }} | cut -d'/' -f 1)"
+          latest="$(curl -s --retry 5 --retry-delay 5 -A "samsung $MODEL SyncML DM Client" "https://fota-cloud-dn.ospserver.net/firmware/$CSC/$MODEL/version.xml" | perl -nE 'say $1 if /<latest[^>]*>(.*?)<\/latest>/')"
+          current="$(cat "prebuilts/samsung/${{ matrix.device }}/.current" 2>/dev/null || echo "")"
+          echo "Latest available: $latest"
+          echo "Current: $current"
+          if [ -z "$current" ] || [ "$latest" != "$current" ]; then
+            need_update=1
+          fi
+          echo "need_update=$need_update" >> "$GITHUB_ENV"
+
+      - name: Free disk space
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        run: |
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /opt/hostedtoolcache \
+            /usr/local/share/powershell \
+            /usr/local/share/chromium \
+            /usr/local/lib/node_modules \
+            /var/lib/docker \
+            /usr/share/man \
+            /usr/share/doc
+          sudo docker system prune -af --volumes 2>/dev/null || true
+          df -h
+
+      - name: Set up build environment
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        run: |
+          sudo rm -rf /etc/needrestart /etc/apt/apt.conf.d/*needrestart* 2>/dev/null || true
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get install -yq --no-install-recommends \
+            7zip attr ccache clang curl ffmpeg jq libbrotli-dev libbz2-dev \
+            libgtest-dev libprotobuf-dev libunwind-dev libpcre2-dev \
+            libzstd-dev linux-modules-$(uname -r) lld protobuf-compiler webp
+          sudo modprobe erofs 2>/dev/null || true
+          sudo modprobe f2fs 2>/dev/null || true
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up JDK 17
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Generate build config
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        run: |
+          source ./buildenv.sh a34x
+          {
+            echo "DEBUG=$DEBUG"
+            echo "SRC_DIR=$SRC_DIR"
+            echo "OUT_DIR=$OUT_DIR"
+            echo "ODIN_DIR=$ODIN_DIR"
+            echo "FW_DIR=$FW_DIR"
+            echo "TOOLS_DIR=$TOOLS_DIR"
+            echo "APKTOOL_DIR=$APKTOOL_DIR"
+            echo "WORK_DIR=$WORK_DIR"
+            echo "TMP_DIR=$TMP_DIR"
+          } >> "$GITHUB_ENV"
+          sed -e "/Automatically/d" -e "s/\"//g" "$OUT_DIR/config.sh" >> "$GITHUB_ENV"
+          echo "$TOOLS_DIR/bin" >> "$GITHUB_PATH"
+
+      - name: Build dependencies
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        run: ./scripts/build_dependencies.sh
+
+      - name: Update prebuilt blobs
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        run: |
+          source ./buildenv.sh a34x
+          ./scripts/internal/update_prebuilt_blobs.sh "${{ matrix.device }}" "${{ matrix.firmware }}"
+
+      - name: Commit and push updated blobs
+        if: steps.filter.outputs.skip == 'false' && env.need_update == '1'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "prebuilts/samsung/${{ matrix.device }}"
+          CURRENT_VER="$(cat "prebuilts/samsung/${{ matrix.device }}/.current" 2>/dev/null || echo 'latest')"
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "prebuilts/samsung/${{ matrix.device }}: update blobs to ${CURRENT_VER}"
+            for i in {1..5}; do
+              git pull --rebase origin main && git push origin HEAD:main && break || sleep 5
+            done
+          else
+            echo "No changes to commit."
+          fi
