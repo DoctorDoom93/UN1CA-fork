@@ -14,7 +14,7 @@
     <local name="SHOOTING_MODE_SUPER_SLOW_MOTION" back="SUPER_SLOW_MOTION" enable="true" more="true" order="11" preview-size="1280x720" capture-size="1280x720"/>
     <local name="SHOOTING_MODE_SLOW_MOTION" back="SLOW_MOTION" enable="true" more="true" order="12" preview-size="1280x720" capture-size="1280x720"/>
     <local name="SHOOTING_MODE_HYPER_LAPSE" back="HYPER_LAPSE" front="HYPER_LAPSE" enable="true" more="true" order="13" preview-size="1920x1080" capture-size="1920x1080"/>
-    <local name="SHOOTING_MODE_SINGLE_TAKE_VIDEO" back="SINGLE_TAKE_VIDEO" front="SINGLE_TAKE_VIDEO" enable="true" more="true" order="14" preview-size="1440x1080" capture-size="3264x2448" front-capture-size="2944x2208"/>
+    <local name="SHOOTING_MODE_SINGLE_TAKE" back="SINGLE_TAKE" front="SINGLE_TAKE" enable="true" more="true" order="14" preview-size="1440x1080" capture-size="3264x2448" front-capture-size="2944x2208"/>
 	<local name="SHOOTING_MODE_QR" back="QR" enable="true" more="false" order="100" preview-size="2336x1080"/>
 
 
@@ -166,6 +166,7 @@
     <local name="CAMERA_SUPPORT_PICTURE_FORMAT" value="false"/>
 
     <!-- Single take lite features-->
+    <local name="SUPPORT_SINGLE_TAKE_CONTINUOUS_AF" value="true"/>
     <local name="SINGLE_TAKE_USING_CONTINUOUS_AF" value="true"/>
     <local name="SINGLE_TAKE_USING_SCENE_OPTIMIZER" value="false"/>
     <local name="SINGLE_TAKE_USING_BEAUTY" value="false" />
@@ -178,7 +179,9 @@
     <local name="SINGLE_TAKE_FRONT_CAMERA_DYNAMIC_FOV" value="false"/>
     <local name="SINGLE_TAKE_PHOTO_LOW_PERFORMANCE" value="true" />
     <local name="SUPPORT_SINGLE_TAKE_COLLAGES" value="true" />
-	<local name="SUPPORT_SINGLE_TAKE_MULTI_CAMERA" value="false" />
+    <local name="SUPPORT_SINGLE_TAKE_MULTI_CAMERA" value="false" />
+    <local name="SUPPORT_SINGLE_TAKE_SETTING_OPTION" value="true" />
+    <local name="SUPPORT_SINGLE_TAKE_EXTENDED_CAPTURE" value="true" />
 
     <!-- Etc. features -->
     <local name="SUPPORT_PRO_AE_PRIORITY_MODE" value="true" />
