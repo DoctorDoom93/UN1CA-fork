@@ -35,7 +35,7 @@ jobs:
         include:
           - module: "Galaxy S24 FE (b7sxxx)"
             device: "b7sxxx"
-            firmware: "SM-S721B/EUX/358976191234561"
+            firmware: "SM-S721B/EUX/357066601234560"
           - module: "Galaxy Tab S9 FE 5G (gts9fexx)"
             device: "gts9fexx"
             firmware: "SM-X516B/EUX/354136921234567"
@@ -44,13 +44,13 @@ jobs:
             firmware: "SM-X736B/EUX/R52Y8065XJM"
           - module: "Galaxy S24 (e1sxxx)"
             device: "e1sxxx"
-            firmware: "SM-S921B/EUX/356391441234562"
+            firmware: "SM-S921B/EUX/354068531234564"
           - module: "Galaxy A56 5G (a56xnaxx)"
             device: "a56xnaxx"
-            firmware: "SM-A566B/EUX/353240891234563"
+            firmware: "SM-A566B/EUX/352371191234565"
           - module: "Galaxy S25 (pa2qxxx)"
             device: "pa2qxxx"
-            firmware: "SM-S936B/EUX/356972271234564"
+            firmware: "SM-S936B/EUX/350634601234562"
 
     steps:
       - name: Check if device should be updated
