@@ -58,18 +58,9 @@ else
     APPLY_PATCH "system" "system/framework/services.jar" \
         "$MODPATH/ead_mdnie/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
 fi
-if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
-    if [ "$TARGET_PLATFORM_SDK_VERSION" -ge "36" ]; then
-        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead_resolution/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
-    else
-        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead_resolution_legacy/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
-    fi
-else
-    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "$MODPATH/ead/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
-fi
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "com/samsung/android/settings/display/controller/SecEADPreferenceController.smali" \
+    "return" "getAvailabilityStatus()I" "0"
 APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
     "$MODPATH/ead/SettingsProvider.apk/0001-Add-Adaptive-color-tone-feature.patch"
 
@@ -374,7 +365,7 @@ LOG_STEP_IN "- Adding Pet Detector support in Galaxy AI features"
 if [ -d "$WORK_DIR/vendor/etc/petdetector/studio_pd" ]; then
     DELETE_FROM_WORK_DIR "vendor" "etc/petdetector/studio_pd"
 fi
-ADD_TO_WORK_DIR "pa2qxxx" "vendor" "etc/petdetector/studio_pd/config_thresholds.json" 0 0 644 "u:object_r:vendor_configs_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.info" 0 0 644 "u:object_r:vendor_configs_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.tflite" 0 0 644 "u:object_r:vendor_configs_file:s0"
+ADD_TO_WORK_DIR "gts11xx" "vendor" "etc/petdetector/studio_pd/config_thresholds.json" 0 0 644 "u:object_r:vendor_configs_file:s0"
+ADD_TO_WORK_DIR "gts11xx" "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.info" 0 0 644 "u:object_r:vendor_configs_file:s0"
+ADD_TO_WORK_DIR "gts11xx" "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.tflite" 0 0 644 "u:object_r:vendor_configs_file:s0"
 LOG_STEP_OUT
