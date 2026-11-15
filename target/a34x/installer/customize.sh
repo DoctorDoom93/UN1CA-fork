@@ -71,3 +71,10 @@ done
 sed -i '/ui_print("Full Patching dtbo\.img img\.\.\.");/d' "$TMP_DIR/META-INF/com/google/android/updater-script"
 sed -i '/package_extract_file("dtbo\.img", "\/dev\/block\/by-name\/dtbo");/d' "$TMP_DIR/META-INF/com/google/android/updater-script"
 EVAL "rm \"$TMP_DIR/dtbo.img\""
+
+# Purge stale testkey / bumped package records on dirty flash
+cat << 'EOF' >> "$TMP_DIR/META-INF/com/google/android/updater-script"
+ui_print("Purging stale SmartSuggestions cache for dirty flash...");
+run_program("/sbin/sh", "-c", "mount /data 2>/dev/null; if [ -f /data/system/packages.xml ]; then rm -rf /data/data/com.samsung.android.smartsuggestions /data/user_de/0/com.samsung.android.smartsuggestions /data/system/package_cache /data/dalvik-cache; sed -i '/<package name=\"com.samsung.android.smartsuggestions\"/,/<\\/package>/d' /data/system/packages.xml; fi");
+run_program("/bin/sh", "-c", "mount /data 2>/dev/null; if [ -f /data/system/packages.xml ]; then rm -rf /data/data/com.samsung.android.smartsuggestions /data/user_de/0/com.samsung.android.smartsuggestions /data/system/package_cache /data/dalvik-cache; sed -i '/<package name=\"com.samsung.android.smartsuggestions\"/,/<\\/package>/d' /data/system/packages.xml; fi");
+EOF
