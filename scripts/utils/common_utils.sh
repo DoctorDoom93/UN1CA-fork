@@ -142,25 +142,53 @@ _GET_SELINUX_LABEL()
             ;;
     esac
 
-    if [ ! -f "$FC_FILE" ]; then
-        LOGE "File not found: ${FC_FILE//$WORK_DIR/}"
-        return 1
-    fi
-
     if [[ "${FILE:0:1}" != "/" ]]; then
         FILE="/$FILE"
     fi
 
-    local LABEL
-    LABEL=$(perl -ne '
-        next if /^\s*#/ || /^\s*$/;
-        s/\s+/ /g;
-        my ($pattern, $label) = split(" ", $_, 3);
-        if ($ARGV[0] =~ /^$pattern$/) {
-            print "$label\n";
-            exit;
-        }
-    ' - "$FILE" <<< "$(tac "$FC_FILE")")
+    local LABEL=""
+    if [ -f "$FC_FILE" ] && [ -s "$FC_FILE" ]; then
+        LABEL=$(perl -e '
+            my $target = shift;
+            while (<STDIN>) {
+                next if /^\s*#/ || /^\s*$/;
+                s/\s+/ /g;
+                my ($pattern, $label) = split(" ", $_, 3);
+                if ($pattern && $label && $target =~ /^$pattern$/) {
+                    print "$label\n";
+                    exit 0;
+                }
+            }
+        ' "$FILE" <<< "$(tac "$FC_FILE")")
+    fi
+
+    local PLAT_FC="$WORK_DIR/system/system/etc/selinux/plat_file_contexts"
+    if [ ! "$LABEL" ] && [ "$FC_FILE" != "$PLAT_FC" ] && [ -f "$PLAT_FC" ]; then
+        LABEL=$(perl -e '
+            my $target = shift;
+            while (<STDIN>) {
+                next if /^\s*#/ || /^\s*$/;
+                s/\s+/ /g;
+                my ($pattern, $label) = split(" ", $_, 3);
+                if ($pattern && $label && $target =~ /^$pattern$/) {
+                    print "$label\n";
+                    exit 0;
+                }
+            }
+        ' "$FILE" <<< "$(tac "$PLAT_FC")")
+    fi
+
+    if [ ! "$LABEL" ]; then
+        case "$PARTITION" in
+            "vendor"|"odm")
+                LABEL="u:object_r:vendor_file:s0"
+                ;;
+            *)
+                LABEL="u:object_r:system_file:s0"
+                ;;
+        esac
+    fi
+
     echo "$LABEL"
 }
 
@@ -374,6 +402,12 @@ ADD_TO_WORK_DIR()
             LOGW "No file_context entry found for \"$ENTRY\" in \"${SOURCE//$SRC_DIR\//}\". Using default value"
 
             LABEL="$(_GET_SELINUX_LABEL "$PARTITION" "/$ENTRY")"
+            if [ ! "$LABEL" ]; then
+                case "$PARTITION" in
+                    "vendor"|"odm") LABEL="u:object_r:vendor_file:s0" ;;
+                    *) LABEL="u:object_r:system_file:s0" ;;
+                esac
+            fi
 
             echo "/$(_HANDLE_SPECIAL_CHARS "$ENTRY") $LABEL" >> "$WORK_DIR/configs/file_context-$PARTITION"
         fi
@@ -415,6 +449,12 @@ ADD_TO_WORK_DIR()
                     LOGW "No file_context entry found for \"$f\" in \"${SOURCE//$SRC_DIR\//}\". Using default value"
 
                     LABEL="$(_GET_SELINUX_LABEL "$PARTITION" "/$f")"
+                    if [ ! "$LABEL" ]; then
+                        case "$PARTITION" in
+                            "vendor"|"odm") LABEL="u:object_r:vendor_file:s0" ;;
+                            *) LABEL="u:object_r:system_file:s0" ;;
+                        esac
+                    fi
 
                     echo "/$(_HANDLE_SPECIAL_CHARS "$f") $LABEL" >> "$WORK_DIR/configs/file_context-$PARTITION"
                 fi
@@ -450,6 +490,12 @@ ADD_TO_WORK_DIR()
                     LOGW "No file_context entry found for \"$TMP\" in \"${SOURCE//$SRC_DIR\//}\". Using default value"
 
                     LABEL="$(_GET_SELINUX_LABEL "$PARTITION" "/$TMP")"
+                    if [ ! "$LABEL" ]; then
+                        case "$PARTITION" in
+                            "vendor"|"odm") LABEL="u:object_r:vendor_file:s0" ;;
+                            *) LABEL="u:object_r:system_file:s0" ;;
+                        esac
+                    fi
 
                     echo "/$(_HANDLE_SPECIAL_CHARS "$TMP") $LABEL" >> "$WORK_DIR/configs/file_context-$PARTITION"
                 fi

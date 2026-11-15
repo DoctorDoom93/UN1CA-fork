@@ -369,6 +369,14 @@ PREPARE_SCRIPT()
         LOGE "File not found: ${FS_CONFIG_FILE//$SRC_DIR\//}"
         exit 1
     fi
+
+    # Clean up any malformed or blank lines in config files to prevent mkfs failures
+    if [ -f "$FILE_CONTEXT_FILE" ]; then
+        awk 'NF>=2' "$FILE_CONTEXT_FILE" > "$FILE_CONTEXT_FILE.tmp" && mv "$FILE_CONTEXT_FILE.tmp" "$FILE_CONTEXT_FILE"
+    fi
+    if [ -f "$FS_CONFIG_FILE" ]; then
+        awk 'NF>=4' "$FS_CONFIG_FILE" > "$FS_CONFIG_FILE.tmp" && mv "$FS_CONFIG_FILE.tmp" "$FS_CONFIG_FILE"
+    fi
 }
 
 PRINT_USAGE()
