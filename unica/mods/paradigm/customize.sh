@@ -207,6 +207,7 @@ LOG_STEP_OUT
 # Requires SEC_FLOATING_FEATURE_COMMON_CONFIG_AI_VERSION >= 20251
 # or SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_AI_BRIEF_FOR_UT
 LOG_STEP_IN "- Adding Now brief feature"
+DELETE_FROM_WORK_DIR "system" "system/priv-app/SamsungSmartSuggestions/oat"
 ADD_TO_WORK_DIR "pa2qxxx" "system" \
     "system/etc/default-permissions/default-permissions-com.samsung.android.app.moments.xml" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "pa2qxxx" "system" \
@@ -218,7 +219,7 @@ ADD_TO_WORK_DIR "$MODPATH" "system" \
     "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" 0 0 644 "u:object_r:system_file:s0"
 DECODE_APK "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk"
 LOG "- Patching versionCode in SamsungSmartSuggestions.apk"
-EVAL "sed -i \"s/710500000/711100100/g\" \"$APKTOOL_DIR/system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk/apktool.yml\""
+EVAL "sed -i \"s/710500000/799999999/g\" \"$APKTOOL_DIR/system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk/apktool.yml\""
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_PERSONALIZED_DATA_CORE" "TRUE"
 LOG_STEP_OUT
 
