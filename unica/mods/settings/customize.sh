@@ -85,24 +85,51 @@ while IFS= read -r f; do
 done < <(find "$MODPATH/SecSettings.apk" -type f)
 
 # Add UN1CA Settings SearchIndexableData registrations
-LOG "- Patching \"smali_classes2/com/android/settingslib/search/SearchIndexableResourcesMobile.smali\" in /system/system/priv-app/SecSettings.apk"
+SEARCH_INDEX_RESOURCES="$(
+    find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" \
+        -path '*/com/android/settings/search/SearchFeatureProviderImpl$$ExternalSyntheticLambda0.smali' \
+        -print -quit
+)"
+if [ -n "$SEARCH_INDEX_RESOURCES" ]; then
+    LOG "- Patching Settings search index providers in /system/system/priv-app/SecSettings.apk"
+    SEARCH_INDEX_RESOURCES_SMALI="${SEARCH_INDEX_RESOURCES#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
+
+    ADD_UNICA_SETTINGS_SEARCH_INDEX_DATA_PROVIDER()
+    {
+        local FRAGMENT="$1"
+
+        if grep -q "L$FRAGMENT;->SEARCH_INDEX_DATA_PROVIDER" "$SEARCH_INDEX_RESOURCES"; then
+            return 0
+        fi
+
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$SEARCH_INDEX_RESOURCES_SMALI" "replace" \
+            'invoke()Ljava/lang/Object;' \
+            'new-instance v0, Lcom/android/settingslib/spa/search/SearchIndexableDataConverter;' \
+            "    new-instance v0, Lcom/android/settingslib/search/SearchIndexableData;\n\n    const-class v1, L$FRAGMENT;\n\n    sget-object v2, L$FRAGMENT;->SEARCH_INDEX_DATA_PROVIDER:Lcom/android/settings/search/BaseSearchIndexProvider;\n\n    invoke-direct {v0, v1, v2}, Lcom/android/settingslib/search/SearchIndexableData;-><init>(Ljava/lang/Class;Lcom/android/settingslib/search/Indexable\$SearchIndexProvider;)V\n\n    invoke-virtual {p0, v0}, Lcom/android/settingslib/search/SearchIndexableResourcesBase;->addIndex(Lcom/android/settingslib/search/SearchIndexableData;)V\n\n    new-instance v0, Lcom/android/settingslib/spa/search/SearchIndexableDataConverter;" \
+            > /dev/null
+    }
+
+    for f in \
+        "io/mesalabs/unica/settings/UnicaSettingsFragment" \
+        "io/mesalabs/unica/settings/extra/ExtraSettingsFragment" \
+        "io/mesalabs/unica/settings/spoof/HideDeveloperStatusFragment" \
+        "io/mesalabs/unica/settings/spoof/SpoofSettingsFragment" \
+        "io/mesalabs/unica/settings/ui/UISettingsFragment" \
+        "io/mesalabs/unica/settings/spoof/CameraFeatureFragment" \
+        "io/mesalabs/unica/settings/font/FontSelectorFragment" \
+        "io/mesalabs/unica/settings/extra/ScpmAllowlistFragment"; do
+        ADD_UNICA_SETTINGS_SEARCH_INDEX_DATA_PROVIDER "$f" || return 1
+    done
+fi
+
+# Mark UN1CA Settings fragments as valid
+LOG "- Patching \"smali/com/android/settings/SettingsActivity.smali\" in /system/system/priv-app/SecSettings.apk"
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes2/com/android/settingslib/search/SearchIndexableResourcesMobile.smali" "replaceall" \
-    '.class public final Lcom/android/settingslib/search/SearchIndexableResourcesMobile;' \
-    '.class public Lcom/android/settingslib/search/SearchIndexableResourcesMobile;' \
-    > /dev/null
-LOG "- Patching \"smali_classes2/com/android/settings/search/SearchFeatureProviderImpl\$\$ExternalSyntheticLambda0.smali\" in /system/system/priv-app/SecSettings.apk"
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes2/com/android/settings/search/SearchFeatureProviderImpl\$\$ExternalSyntheticLambda0.smali" "replace" \
-    'invoke()Ljava/lang/Object;' \
-    'new-instance p0, Lcom/android/settingslib/search/SearchIndexableResourcesMobile;' \
-    'new-instance p0, Lio/mesalabs/unica/search/UnicaSearchIndexableResources;' \
-    > /dev/null
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes2/com/android/settings/search/SearchFeatureProviderImpl\$\$ExternalSyntheticLambda0.smali" "replace" \
-    'invoke()Ljava/lang/Object;' \
-    'invoke-direct {p0}, Lcom/android/settingslib/search/SearchIndexableResourcesBase;-><init>()V' \
-    'invoke-direct {p0}, Lio/mesalabs/unica/search/UnicaSearchIndexableResources;-><init>()V' \
+    "smali/com/android/settings/SettingsActivity.smali" "replace" \
+    'isValidFragment(Ljava/lang/String;)Z' \
+    'const/4 p0, 0x0' \
+    'const-string v0, "io.mesalabs.unica."\n\n    invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z\n\n    move-result v0\n\n    if-eqz v0, :cond_unica_valid\n\n    const/4 v0, 0x1\n\n    return v0\n\n    :cond_unica_valid\n    const/4 p0, 0x0' \
     > /dev/null
 
 if [ -f "$WORK_DIR/system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" ]; then
