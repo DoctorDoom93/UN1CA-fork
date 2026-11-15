@@ -71,10 +71,10 @@ index 80753521..217b4e3c 100644
  
      return-object v0
  .end method
-diff --git a/smali_classes3/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali b/smali_classes3/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali
+diff --git a/smali_classes4/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali b/smali_classes4/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali
 index 3f9a0c3e..09d89d0b 100644
---- a/smali_classes3/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali
-+++ b/smali_classes3/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali
+--- a/smali_classes4/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali
++++ b/smali_classes4/android/system/keystore2/IKeystoreSecurityLevel$Stub$Proxy.smali
 @@ -145,6 +145,15 @@
          }
      .end annotation
@@ -211,14 +211,15 @@ index 3f9a0c3e..09d89d0b 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-diff --git a/smali_classes3/android/system/keystore2/IKeystoreService$Stub$Proxy.smali b/smali_classes3/android/system/keystore2/IKeystoreService$Stub$Proxy.smali
+diff --git a/smali_classes4/android/system/keystore2/IKeystoreService$Stub$Proxy.smali b/smali_classes4/android/system/keystore2/IKeystoreService$Stub$Proxy.smali
 index 2bf02c02..0526df77 100644
---- a/smali_classes3/android/system/keystore2/IKeystoreService$Stub$Proxy.smali
-+++ b/smali_classes3/android/system/keystore2/IKeystoreService$Stub$Proxy.smali
-@@ -62,6 +62,15 @@
+--- a/smali_classes4/android/system/keystore2/IKeystoreService$Stub$Proxy.smali
++++ b/smali_classes4/android/system/keystore2/IKeystoreService$Stub$Proxy.smali
+@@ -62,7 +62,17 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1}, Lio/mesalabs/unica/KeyboxImitationHooks;->onDeleteKey(Landroid/system/keystore2/KeyDescriptor;)Z
 +
 +    move-result v0
@@ -228,10 +229,12 @@ index 2bf02c02..0526df77 100644
 +    return-void
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -91,7 +100,7 @@
+ 
+@@ -91,7 +101,7 @@
  
      move-result p0
  
@@ -240,7 +243,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
      :try_end_0
-@@ -103,7 +112,7 @@
+@@ -103,7 +113,7 @@
  
      return-void
  
@@ -249,10 +252,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -307,6 +316,15 @@
+@@ -307,7 +317,17 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1}, Lio/mesalabs/unica/KeyboxImitationHooks;->onGetKeyEntry(Landroid/system/keystore2/KeyDescriptor;)Landroid/system/keystore2/KeyEntryResponse;
 +
 +    move-result-object v0
@@ -262,10 +266,12 @@ index 2bf02c02..0526df77 100644
 +    return-object v0
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -336,7 +354,7 @@
+ 
+@@ -336,7 +356,7 @@
  
      move-result p0
  
@@ -274,7 +280,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
  
-@@ -356,7 +374,7 @@
+@@ -356,7 +376,7 @@
  
      return-object p0
  
@@ -283,10 +289,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -386,6 +404,19 @@
+@@ -386,7 +406,21 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1}, Lio/mesalabs/unica/KeyboxImitationHooks;->onGetNumberOfEntries(I)Ljava/lang/Integer;
 +
 +    move-result-object v0
@@ -300,10 +307,12 @@ index 2bf02c02..0526df77 100644
 +    return p0
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -417,7 +448,7 @@
+ 
+@@ -417,7 +451,7 @@
  
      move-result p0
  
@@ -312,7 +321,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
  
-@@ -433,7 +464,7 @@
+@@ -433,7 +467,7 @@
  
      return p0
  
@@ -321,10 +330,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -617,6 +648,15 @@
+@@ -617,7 +651,17 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1, p2, p3}, Lio/mesalabs/unica/KeyboxImitationHooks;->onGrant(Landroid/system/keystore2/KeyDescriptor;II)Landroid/system/keystore2/KeyDescriptor;
 +
 +    move-result-object v0
@@ -334,10 +344,12 @@ index 2bf02c02..0526df77 100644
 +    return-object v0
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -650,7 +690,7 @@
+ 
+@@ -650,7 +694,7 @@
  
      move-result p0
  
@@ -346,7 +358,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
  
-@@ -670,7 +710,7 @@
+@@ -670,7 +714,7 @@
  
      return-object p0
  
@@ -355,10 +367,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -700,6 +740,15 @@
+@@ -700,7 +744,17 @@
          }
      .end annotation
  
+-    .annotation runtime Ljava/lang/Deprecated;
 +    invoke-static {p1}, Lio/mesalabs/unica/KeyboxImitationHooks;->onListEntries(I)[Landroid/system/keystore2/KeyDescriptor;
 +
 +    move-result-object v0
@@ -368,10 +381,12 @@ index 2bf02c02..0526df77 100644
 +    return-object v0
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++.annotation runtime Ljava/lang/Deprecated;
+     .end annotation
  
-     move-result-object v0
-@@ -731,7 +780,7 @@
+     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
+@@ -734,7 +788,7 @@
  
      move-result p0
  
@@ -380,7 +395,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
  
-@@ -751,7 +800,7 @@
+@@ -754,7 +808,7 @@
  
      return-object p0
  
@@ -389,10 +404,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -781,6 +830,15 @@
+@@ -784,7 +838,17 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1, p4}, Lio/mesalabs/unica/KeyboxImitationHooks;->onListEntriesBatched(ILjava/lang/String;)[Landroid/system/keystore2/KeyDescriptor;
 +
 +    move-result-object v0
@@ -402,10 +418,12 @@ index 2bf02c02..0526df77 100644
 +    return-object v0
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -814,7 +872,7 @@
+ 
+@@ -817,7 +881,7 @@
  
      move-result p0
  
@@ -414,7 +432,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
  
-@@ -834,7 +892,7 @@
+@@ -837,7 +901,7 @@
  
      return-object p0
  
@@ -423,10 +441,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -864,6 +922,15 @@
+@@ -867,7 +931,17 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1, p2}, Lio/mesalabs/unica/KeyboxImitationHooks;->onUngrant(Landroid/system/keystore2/KeyDescriptor;I)Z
 +
 +    move-result v0
@@ -436,10 +455,12 @@ index 2bf02c02..0526df77 100644
 +    return-void
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -895,7 +962,7 @@
+ 
+@@ -898,7 +972,7 @@
  
      move-result p0
  
@@ -448,7 +469,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
      :try_end_0
-@@ -907,7 +974,7 @@
+@@ -910,7 +984,7 @@
  
      return-void
  
@@ -457,10 +478,11 @@ index 2bf02c02..0526df77 100644
      :try_start_1
      new-instance p0, Landroid/os/RemoteException;
  
-@@ -937,6 +1004,15 @@
+@@ -940,7 +1014,17 @@
          }
      .end annotation
  
+-    invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 +    invoke-static {p1, p2, p3}, Lio/mesalabs/unica/KeyboxImitationHooks;->onUpdateSubcomponent(Landroid/system/keystore2/KeyDescriptor;[B[B)Z
 +
 +    move-result v0
@@ -470,10 +492,12 @@ index 2bf02c02..0526df77 100644
 +    return-void
 +
 +    :cond_0
-     invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
++
++invoke-virtual {p0}, Landroid/system/keystore2/IKeystoreService$Stub$Proxy;->asBinder()Landroid/os/IBinder;
  
      move-result-object v0
-@@ -970,7 +1046,7 @@
+ 
+@@ -973,7 +1057,7 @@
  
      move-result p0
  
@@ -482,7 +506,7 @@ index 2bf02c02..0526df77 100644
  
      invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
      :try_end_0
-@@ -982,7 +1058,7 @@
+@@ -985,7 +1069,7 @@
  
      return-void
  

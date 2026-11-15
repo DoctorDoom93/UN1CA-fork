@@ -1,3 +1,8 @@
+if [[ "$TARGET_OS_FILE_SYSTEM_TYPE" == "erofs" ]]; then
+    LOG "\033[0;33m! Target filesystem is erofs (stock); skipping\033[0m"
+    return 0
+fi
+
 # [
 PARTITIONS_LIST="system vendor product system_ext odm vendor_dlkm odm_dlkm system_dlkm"
 

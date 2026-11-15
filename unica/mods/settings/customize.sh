@@ -22,25 +22,37 @@ DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
 # Disable stock OTA references
 if [ ! -f "$WORK_DIR/system/system/priv-app/ChoiDujour/ChoiDujour.apk" ]; then
-    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "smali_classes5/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
-        'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
-        'false'
+    SW_UTILS="smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali"
+    [ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$SW_UTILS" ] && SW_UTILS="smali_classes5/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali"
+    if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$SW_UTILS" ] && grep -q "isOTAUpgradeAllowed" "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$SW_UTILS"; then
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$SW_UTILS" "return" \
+            'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
+            'false'
+    fi
 fi
 
 # Always show One UI minor version
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes5/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali" "replace" \
-    'isDeviceWithMicroVersion()Z' \
-    'move-result p0' \
-    'const/4 p0, 0x1'
+ONEUI_CONTROLLER="smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali"
+[ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$ONEUI_CONTROLLER" ] && ONEUI_CONTROLLER="smali_classes5/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali"
+if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$ONEUI_CONTROLLER" ]; then
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$ONEUI_CONTROLLER" "replace" \
+        'isDeviceWithMicroVersion()Z' \
+        'move-result p0' \
+        'const/4 p0, 0x1'
+fi
 
 # Show real device model number
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali" "replace" \
-    'getModelName()Ljava/lang/String;' \
-    'ro.product.model' \
-    'ro.boot.em.model'
+MODEL_GETTER="smali_classes3/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali"
+[ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$MODEL_GETTER" ] && MODEL_GETTER="smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali"
+if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$MODEL_GETTER" ]; then
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$MODEL_GETTER" "replace" \
+        'getModelName()Ljava/lang/String;' \
+        'ro.product.model' \
+        'ro.boot.em.model'
+fi
 
 LOG_STEP_IN "- Adding UN1CA Settings"
 
@@ -93,26 +105,46 @@ SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     'invoke-direct {p0}, Lio/mesalabs/unica/search/UnicaSearchIndexableResources;-><init>()V' \
     > /dev/null
 
-DECODE_APK "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
-LOG "- Patching \"smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali\" in /system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
-SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
-    "smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali" "replace" \
-    '<init>(Landroid/content/Context;)V' \
-    '.locals 36' \
-    '.locals 37' \
-    > /dev/null
-SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
-    "smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali" "replace" \
-    '<init>(Landroid/content/Context;)V' \
-    'filled-new-array/range {v1 .. v35}, [Ljava/lang/String;' \
-    '    const-string v36, "top_level_unica"\n\n    filled-new-array/range {v1 .. v36}, [Ljava/lang/String;' \
-    > /dev/null
+if [ -f "$WORK_DIR/system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" ]; then
+    DECODE_APK "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
+    TOP_KEYS="smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali"
+    if [ -f "$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/$TOP_KEYS" ]; then
+        LOG "- Patching \"$TOP_KEYS\" in /system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
+        if grep -q "filled-new-array/range {v1 .. v36}" "$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/$TOP_KEYS"; then
+            SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
+                "$TOP_KEYS" "replace" \
+                '<init>(Landroid/content/Context;)V' \
+                '.locals 37' \
+                '.locals 38' \
+                > /dev/null
+            SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
+                "$TOP_KEYS" "replace" \
+                '<init>(Landroid/content/Context;)V' \
+                'filled-new-array/range {v1 .. v36}, [Ljava/lang/String;' \
+                '    const-string v37, "top_level_unica"\n\n    filled-new-array/range {v1 .. v37}, [Ljava/lang/String;' \
+                > /dev/null
+        elif grep -q "filled-new-array/range {v1 .. v35}" "$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/$TOP_KEYS"; then
+            SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
+                "$TOP_KEYS" "replace" \
+                '<init>(Landroid/content/Context;)V' \
+                '.locals 36' \
+                '.locals 37' \
+                > /dev/null
+            SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
+                "$TOP_KEYS" "replace" \
+                '<init>(Landroid/content/Context;)V' \
+                'filled-new-array/range {v1 .. v35}, [Ljava/lang/String;' \
+                '    const-string v36, "top_level_unica"\n\n    filled-new-array/range {v1 .. v36}, [Ljava/lang/String;' \
+                > /dev/null
+        fi
+    fi
+fi
 
 # Show Vulkan renderer toggle if required
 if [[ "$(GET_PROP "ro.hwui.use_vulkan")" != "true" ]]; then
     SET_PROP "system" "persist.sys.unica.vulkan" "false"
 fi
 
-unset PATCH_INST CONTENT
+unset PATCH_INST CONTENT SW_UTILS ONEUI_CONTROLLER MODEL_GETTER TOP_KEYS
 
 LOG_STEP_OUT
