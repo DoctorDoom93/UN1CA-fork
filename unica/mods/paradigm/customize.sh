@@ -150,7 +150,18 @@ ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/HWResourceShare/HWResourceSha
 DELETE_FROM_WORK_DIR "system" "system/priv-app/PhotoEditor_Full"
 ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" 0 0 644 "u:object_r:system_file:s0"
 # Enable text-based create tab, part of 20261 Galaxy AI features
-SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "smali_classes4/K1/c.smali" "replace" "D()V" "move-result v0" "const/16 v0, 0x4f25"
+DECODE_APK "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk"
+if [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali_classes4/q4/b.smali" ] || [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali/q4/b.smali" ]; then
+    SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "q4/b.smali" "return" "t()Z" "true"
+elif [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali_classes4/K1/c.smali" ]; then
+    SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "smali_classes4/K1/c.smali" "replace" "D()V" "move-result v0" "const/16 v0, 0x4f25"
+else
+    PE_CLASS="$(grep -r "const/16 .*, 0x4f25" "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" 2>/dev/null | head -n1 | cut -d: -f1)"
+    if [ "$PE_CLASS" ]; then
+        LOG "- Enabling text-based create in $(basename "$PE_CLASS")"
+        sed -i 's/const\/16 \(.*\), 0x4f25/const\/16 \1, 0x0/g' "$PE_CLASS"
+    fi
+fi
 
 LOG_STEP_OUT
 
@@ -188,7 +199,7 @@ ADD_TO_WORK_DIR "pa2qxxx" "system" "system/lib64/libmultisourceseparator.audio.s
 ADD_TO_WORK_DIR "pa2qxxx" "system" "system/lib64/libmultisourceseparator.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "pa2qxxx" "system" "system/lib64/libsbs.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "pa2qxxx" "system" "system/lib64/libtensorflowlite_gpu_delegate.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" "system/lib64/libveframework.videoeditor.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "gts11xx" "system" "system/lib64/libveframework.videoeditor.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_AUDIO_CONFIG_MULTISOURCE_SEPARATOR" "{FastScanning_6, SourceSeparator_4, Version_1.3.0}"
 LOG_STEP_OUT
 
