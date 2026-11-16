@@ -135,7 +135,7 @@
 .end method
 
 .method public final onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-    .locals 2
+    .locals 4
 
     invoke-super {p0, p1, p2, p3}, Lcom/android/settings/SettingsPreferenceFragment;->onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 
@@ -249,15 +249,42 @@
 
     iput-object v1, p0, Lio/mesalabs/unica/settings/hma/HideMyApplistFragment;->mLoadingViewController:Lcom/android/settings/widget/LoadingViewController;
 
-    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getActivity()Landroidx/fragment/app/FragmentActivity;
+    instance-of v0, p3, Landroid/view/ViewGroup;
 
-    move-result-object p1
+    if-eqz v0, :cond_switch_bar_done
 
-    check-cast p1, Lcom/android/settings/SettingsActivity;
+    move-object v0, p3
 
-    iget-object p1, p1, Lcom/android/settings/SettingsActivity;->mMainSwitch:Lcom/android/settings/widget/SettingsMainSwitchBar;
+    check-cast v0, Landroid/view/ViewGroup;
 
-    iput-object p1, p0, Lio/mesalabs/unica/settings/hma/HideMyApplistFragment;->mSwitchBar:Lcom/android/settings/widget/SettingsMainSwitchBar;
+    const-string v1, "layout"
+
+    const-string v2, "sec_settings_main_switch_bar"
+
+    invoke-static {v1, v2}, Lio/mesalabs/unica/utils/Utils;->getResourceId(Ljava/lang/String;Ljava/lang/String;)I
+
+    move-result v1
+
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getLayoutInflater()Landroid/view/LayoutInflater;
+
+    move-result-object v2
+
+    const/4 v3, 0x0
+
+    invoke-virtual {v2, v1, v0, v3}, Landroid/view/LayoutInflater;->inflate(ILandroid/view/ViewGroup;Z)Landroid/view/View;
+
+    move-result-object v1
+
+    check-cast v1, Lcom/android/settings/widget/SettingsMainSwitchBar;
+
+    iput-object v1, p0, Lio/mesalabs/unica/settings/hma/HideMyApplistFragment;->mSwitchBar:Lcom/android/settings/widget/SettingsMainSwitchBar;
+
+    invoke-virtual {v0, v1, v3}, Landroid/view/ViewGroup;->addView(Landroid/view/View;I)V
+
+    :cond_switch_bar_done
+    iget-object p1, p0, Lio/mesalabs/unica/settings/hma/HideMyApplistFragment;->mSwitchBar:Lcom/android/settings/widget/SettingsMainSwitchBar;
+
+    if-eqz p1, :cond_switch_done
 
     iget-object p2, p0, Lio/mesalabs/unica/settings/hma/HideMyApplistFragment;->mContext:Landroid/content/Context;
 
@@ -290,6 +317,8 @@
     iget-object p0, p0, Lio/mesalabs/unica/settings/hma/HideMyApplistFragment;->mSwitchBar:Lcom/android/settings/widget/SettingsMainSwitchBar;
 
     invoke-virtual {p0}, Landroidx/appcompat/widget/SeslSwitchBar;->show()V
+
+    :cond_switch_done
 
     return-object p3
 .end method
