@@ -740,9 +740,18 @@
 
     move-result v6
 
+    if-nez v6, :cond_algo_ec
+
+    const-string v6, "ec"
+
+    invoke-virtual {v6, v5}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
+
+    move-result v6
+
     if-eqz v6, :cond_3
 
-    move-object v10, v5
+    :cond_algo_ec
+    const-string v10, "ecdsa"
 
     move/from16 v13, v21
 
@@ -897,130 +906,108 @@
     goto/16 :goto_0
 
     :cond_a
-    move v5, v9
-
     move/from16 v20, v12
 
     move/from16 v21, v13
 
-    if-ne v11, v5, :cond_f
+    const/4 v5, 0x0
 
-    if-eqz v20, :cond_f
+    if-eqz v20, :cond_ec_done
 
-    if-eqz v21, :cond_f
+    if-eqz v21, :cond_ec_done
 
-    if-eqz v14, :cond_f
-
-    if-nez v15, :cond_b
-
-    goto :goto_7
-
-    :cond_b
     invoke-virtual {v0}, Ljava/util/ArrayList;->isEmpty()Z
-
-    move-result v5
-
-    if-nez v5, :cond_e
-
-    invoke-virtual {v4}, Ljava/util/ArrayList;->isEmpty()Z
-
-    move-result v5
-
-    if-eqz v5, :cond_c
-
-    goto :goto_6
-
-    :cond_c
-    const-string v5, "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAr7bHgiuxpwHsK7Qui8xUFmOr75gvMsd/dTEDDJdSSxtf6An7xyqpRR90PL2abxM1dEqlXnf2tqw1Ne4Xwl5jlRfdnJLmN0pTy/4lj4/7tv0Sk3iiKkypnEUtR6WfMgH0QZfKHM1+di+y9TFRtv6y//0rb+T+W8a9nsNL/ggjnar86461qO0rOs2cXjp3kOG1FEJ5MVmFmBGtnrKpa73XpXyTqRxB/M0n1n/W9nGqC4FSYa04T6N5RIZGBN2z2MT5IKGbFlbC8UrW0DxW7AYImQQcHtGl/m00QLVWutHQoVJYnFPlXTcHYvASLu+RhhsbDmxMgJJ0mcDpvsC4PjvB+TxywElgS70vE0XmLD+OJtvsBslHZvPBKCOdT0MS+tgSOIfga+z1Z1g7+DVagf7quvmag8jfPioyKvxnK/EgsTUVi2ghzq8wm27ud/mIM7AY2qEORR8Go3TVB4HzWQgpZrt3i5MIlCaY504LzSRiigHCzAPlHws+W0rB5N+er5/2pJKnfBSDiCiFAVtCLOZ7gLiMm0jhO2B6tUXHI/+MRPjy02i59lINMRRev56GKtcd9qO/0kUJWdZTdA2XoS82ixPvZtXQpUpuL12ab+9EaDK8Z4RHJYYfCT3Q5vNAXaiWQ+8PTWm2QgBR/bkwSWc+NpUFgNPN9PvQi8WEg5UmAGMCAwEAAQ=="
-
-    move/from16 v6, v16
-
-    invoke-static {v5, v6}, Landroid/util/Base64;->decode(Ljava/lang/String;I)[B
-
-    move-result-object v5
-
-    const-string v7, "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEI9ojcU7fPlsFCjxy6IRqzgeOoK0b+YsV9FPQywiyw8EQRTkJ9u3qwfnI4DGoSLlBqClTXJfgfCcZvs60FikNMHnu4fkRzObfgDkU2KNXezT9/RQ+XvNslxPHrHCowhGr"
-
-    invoke-static {v7, v6}, Landroid/util/Base64;->decode(Ljava/lang/String;I)[B
-
-    move-result-object v7
-
-    :try_start_5
-    invoke-virtual {v0}, Ljava/util/ArrayList;->getLast()Ljava/lang/Object;
-
-    move-result-object v0
-
-    check-cast v0, Ljava/lang/String;
-
-    invoke-static {v0}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->parseCertificate(Ljava/lang/String;)Ljava/security/cert/X509Certificate;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/security/cert/X509Certificate;->getPublicKey()Ljava/security/PublicKey;
-
-    move-result-object v0
-
-    invoke-interface {v0}, Ljava/security/PublicKey;->getEncoded()[B
-
-    move-result-object v0
-
-    invoke-virtual {v4}, Ljava/util/ArrayList;->getLast()Ljava/lang/Object;
-
-    move-result-object v4
-
-    check-cast v4, Ljava/lang/String;
-
-    invoke-static {v4}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->parseCertificate(Ljava/lang/String;)Ljava/security/cert/X509Certificate;
-
-    move-result-object v4
-
-    invoke-virtual {v4}, Ljava/security/cert/X509Certificate;->getPublicKey()Ljava/security/PublicKey;
-
-    move-result-object v4
-
-    invoke-interface {v4}, Ljava/security/PublicKey;->getEncoded()[B
-
-    move-result-object v4
-
-    invoke-static {v0, v5}, Ljava/util/Arrays;->equals([B[B)Z
 
     move-result v6
 
-    if-nez v6, :cond_d
+    if-nez v6, :cond_ec_done
 
-    invoke-static {v0, v7}, Ljava/util/Arrays;->equals([B[B)Z
+    const/4 v5, 0x1
 
-    move-result v0
+    :cond_ec_done
+    const/4 v6, 0x0
 
-    if-nez v0, :cond_d
+    if-eqz v14, :cond_rsa_done
 
-    invoke-static {v4, v5}, Ljava/util/Arrays;->equals([B[B)Z
+    if-eqz v15, :cond_rsa_done
 
-    move-result v0
+    invoke-virtual {v4}, Ljava/util/ArrayList;->isEmpty()Z
 
-    if-nez v0, :cond_d
+    move-result v7
 
-    invoke-static {v4, v7}, Ljava/util/Arrays;->equals([B[B)Z
+    if-nez v7, :cond_rsa_done
 
-    move-result v0
+    const/4 v6, 0x1
 
-    if-nez v0, :cond_d
+    :cond_rsa_done
+    or-int v7, v5, v6
 
-    const/4 v6, 0x4
+    if-nez v7, :cond_check_certs
 
-    invoke-static {v1, v6}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->showToast(Landroid/content/Context;I)V
-    :try_end_5
-    .catch Ljava/security/cert/CertificateException; {:try_start_5 .. :try_end_5} :catch_1
-    .catch Ljava/lang/IllegalArgumentException; {:try_start_5 .. :try_end_5} :catch_1
+    const/4 v5, 0x3
+
+    invoke-static {v1, v5}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->showToast(Landroid/content/Context;I)V
 
     const/16 v16, 0x0
 
     return v16
 
-    :cond_d
-    const/16 v19, 0x1
+    :cond_check_certs
+    :try_start_5
+    if-eqz v5, :cond_verify_rsa
 
-    return v19
+    invoke-virtual {v0}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
+
+    move-result-object v0
+
+    :goto_ec_loop
+    invoke-interface {v0}, Ljava/util/Iterator;->hasNext()Z
+
+    move-result v5
+
+    if-eqz v5, :cond_verify_rsa
+
+    invoke-interface {v0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+
+    move-result-object v5
+
+    check-cast v5, Ljava/lang/String;
+
+    invoke-static {v5}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->parseCertificate(Ljava/lang/String;)Ljava/security/cert/X509Certificate;
+
+    goto :goto_ec_loop
+
+    :cond_verify_rsa
+    if-eqz v6, :cond_valid_success
+
+    invoke-virtual {v4}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
+
+    move-result-object v4
+
+    :goto_rsa_loop
+    invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
+
+    move-result v5
+
+    if-eqz v5, :cond_valid_success
+
+    invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+
+    move-result-object v5
+
+    check-cast v5, Ljava/lang/String;
+
+    invoke-static {v5}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->parseCertificate(Ljava/lang/String;)Ljava/security/cert/X509Certificate;
+
+    goto :goto_rsa_loop
+
+    :cond_valid_success
+    const/4 v0, 0x1
+
+    return v0
+    :try_end_5
+    .catch Ljava/security/cert/CertificateException; {:try_start_5 .. :try_end_5} :catch_1
+    .catch Ljava/lang/IllegalArgumentException; {:try_start_5 .. :try_end_5} :catch_1
 
     :catch_1
     move-exception v0
@@ -1033,22 +1020,6 @@
 
     :goto_5
     const/16 v16, 0x0
-
-    return v16
-
-    :cond_e
-    :goto_6
-    const/4 v5, 0x3
-
-    invoke-static {v1, v5}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->showToast(Landroid/content/Context;I)V
-
-    return v16
-
-    :cond_f
-    :goto_7
-    const/4 v5, 0x3
-
-    invoke-static {v1, v5}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->showToast(Landroid/content/Context;I)V
 
     return v16
 

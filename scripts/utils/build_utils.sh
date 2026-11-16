@@ -90,18 +90,11 @@ GET_RELEASE_ZIP_NAME()
     local COMMIT
     local RELEASE
     local ORIGINAL_VERSION="$VERSION"
-    local SIGN=""
 
     VERSION="${VERSION%-dirty}"
     COMMIT="${VERSION##*-}"
-    RELEASE="${VERSION%-*}"
-    if [[ "$RELEASE" =~ ^(OneUI[^_]+)_([^_]+)_UnOfficial_by_Rezoss[+]*$ ]]; then
-        echo "$(TZ=Europe/Paris date +%d%m%y-%H%M%S)_${COMMIT}_${BASH_REMATCH[1]}-${SUFFIX}_UN1CA-${BASH_REMATCH[2]}_Rezoss_${DEVICE}.zip"
-    else
-        # Preserve naming for releases using a different version schema.
-        if ! $DEBUG || $ROM_IS_OFFICIAL; then
-            SIGN="-sign"
-        fi
-        echo "UN1CA_${ORIGINAL_VERSION}_$(date +%d%m%y-%H%M%S)_${DEVICE}${SIGN}_${SUFFIX}.zip"
+    if [ -z "$COMMIT" ] || [ "$COMMIT" = "$VERSION" ]; then
+        COMMIT="$(git rev-parse --short HEAD 2> /dev/null || echo "null")"
     fi
+    echo "UN1CA_fork_${COMMIT}_${DEVICE}sign.zip"
 }

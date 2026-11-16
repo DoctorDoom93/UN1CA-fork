@@ -993,8 +993,20 @@ index 00000000..a705d18c
 +
 +    move-result v5
 +
++    if-eqz v5, :cond_check_ec
++
++    goto :cond_is_ec
++
++    :cond_check_ec
++    const-string v5, "ec"
++
++    invoke-virtual {v5, p1}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
++
++    move-result v5
++
 +    if-eqz v5, :cond_3
 +
++    :cond_is_ec
 +    const-string p1, "EC"
 +
 +    :goto_1
@@ -1116,11 +1128,9 @@ index 00000000..a705d18c
 +    :cond_7
 +    if-nez v4, :cond_8
 +
-+    const-string p0, "Missing <NumberOfKeyboxes> in keybox XML"
++    const-string v4, "Missing <NumberOfKeyboxes> in keybox XML, continuing anyway"
 +
-+    invoke-static {v0, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-+
-+    return-void
++    invoke-static {v0, v4}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 +
 +    :cond_8
 +    invoke-virtual {p0}, Lio/mesalabs/unica/KeyProviderManager$DefaultKeyboxProvider;->hasKeybox()Z
@@ -1235,21 +1245,8 @@ index 00000000..a705d18c
 +
 +    const/4 v1, 0x0
 +
-+    if-eqz v0, :cond_2
++    if-eqz v0, :cond_check_rsa
 +
-+    iget-object v0, p0, Lio/mesalabs/unica/KeyProviderManager$DefaultKeyboxProvider;->keyboxData:Ljava/util/Map;
-+
-+    const-string v2, "RSA.PRIV"
-+
-+    invoke-interface {v0, v2}, Ljava/util/Map;->containsKey(Ljava/lang/Object;)Z
-+
-+    move-result v0
-+
-+    if-nez v0, :cond_0
-+
-+    goto :goto_0
-+
-+    :cond_0
 +    iget-object v0, p0, Lio/mesalabs/unica/KeyProviderManager$DefaultKeyboxProvider;->keyboxData:Ljava/util/Map;
 +
 +    const-string v2, "EC.CERT_1"
@@ -1258,7 +1255,22 @@ index 00000000..a705d18c
 +
 +    move-result v0
 +
-+    if-eqz v0, :cond_2
++    if-eqz v0, :cond_check_rsa
++
++    const/4 v0, 0x1
++
++    return v0
++
++    :cond_check_rsa
++    iget-object v0, p0, Lio/mesalabs/unica/KeyProviderManager$DefaultKeyboxProvider;->keyboxData:Ljava/util/Map;
++
++    const-string v2, "RSA.PRIV"
++
++    invoke-interface {v0, v2}, Ljava/util/Map;->containsKey(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :cond_none
 +
 +    iget-object p0, p0, Lio/mesalabs/unica/KeyProviderManager$DefaultKeyboxProvider;->keyboxData:Ljava/util/Map;
 +
@@ -1268,17 +1280,13 @@ index 00000000..a705d18c
 +
 +    move-result p0
 +
-+    if-nez p0, :cond_1
++    if-eqz p0, :cond_none
 +
-+    goto :goto_0
-+
-+    :cond_1
 +    const/4 p0, 0x1
 +
 +    return p0
 +
-+    :cond_2
-+    :goto_0
++    :cond_none
 +    return v1
 +.end method
 diff --git a/smali_classes6/io/mesalabs/unica/KeyProviderManager-IA.smali b/smali_classes6/io/mesalabs/unica/KeyProviderManager-IA.smali
