@@ -1,10 +1,20 @@
+From 9dcdbbc15b05e0054b99ee2dbe419f34d80aab1a Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Fri, 24 Oct 2025 16:07:43 +0200
+Subject: [PATCH] Allow disable ASKS
+
+---
+ .../server/asks/ASKSManagerService.smali | 22 ++++++++--------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
 diff --git a/smali/com/android/server/asks/ASKSManagerService.smali b/smali/com/android/server/asks/ASKSManagerService.smali
-index 5a0d7da1d..d76851993 100644
 --- a/smali/com/android/server/asks/ASKSManagerService.smali
 +++ b/smali/com/android/server/asks/ASKSManagerService.smali
-@@ -4676,15 +4676,13 @@
+@@ -4702,13 +4702,13 @@
+
+     :cond_0
      move-object p1, v0
- 
+
      :goto_0
 -    const-string/jumbo v1, "ro.build.official.release"
 -
@@ -12,34 +22,34 @@ index 5a0d7da1d..d76851993 100644
 +    const-string/jumbo v1, "persist.sys.unica.asks"
 +
 +    const-string/jumbo v2, "true"
- 
+
      invoke-static {v1, v2}, Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
- 
+
      move-result-object v1
--
--    const-string/jumbo v2, "true"
- 
-     invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
- 
-@@ -28544,11 +28542,9 @@
+
+@@ -28560,13 +28560,13 @@
+     invoke-static {v1, v0}, Landroid/util/Slog;->d(Ljava/lang/String;Ljava/lang/String;)I
+
      :cond_6
      const-string/jumbo v0, "true"
- 
+
 -    const-string/jumbo v1, "ro.build.official.release"
 -
 -    const-string/jumbo v2, "false"
--
--    invoke-static {v1, v2}, Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +    const-string/jumbo v1, "persist.sys.unica.asks"
 +
-+    invoke-static {v1, v0}, Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
- 
++    const-string/jumbo v2, "true"
+
+     invoke-static {v1, v2}, Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
      move-result-object v1
- 
-@@ -30560,13 +30556,13 @@
- 
+
+@@ -30495,17 +30495,17 @@
+
+     const-string v6, "0x1"
+
      invoke-virtual {v6, v10}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
- 
+
 -    const-string/jumbo v6, "ro.build.official.release"
 -
 -    invoke-static {v6}, Landroid/os/SystemProperties;->get(Ljava/lang/String;)Ljava/lang/String;
@@ -48,10 +58,14 @@ index 5a0d7da1d..d76851993 100644
 +    const-string/jumbo v10, "true"
 +
 +    invoke-static {v6, v10}, Landroid/os/SystemProperties;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
- 
+
      move-result-object v6
 -
 -    const-string/jumbo v10, "true"
- 
+
      invoke-virtual {v10, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
- 
+
+     move-result v10
+
+-- 
+2.51.2
