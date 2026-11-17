@@ -2,33 +2,42 @@ From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: UN1CA <noreply@unica>
 Subject: [PATCH] Allow app downgrade
 
-Android 17: anchor the toggle in verifyReplacingVersionCode and retain
-registers and monitor exception coverage.
+Android 17: anchor the toggle in verifyReplacingVersionCode with
+isUnicaDowngradeAllowed helper using ActivityThread context.
 ---
 diff --git a/smali_classes2/com/android/server/pm/PackageManagerService.smali b/smali_classes2/com/android/server/pm/PackageManagerService.smali
+index c1eeb87..6a026b3 100644
 --- a/smali_classes2/com/android/server/pm/PackageManagerService.smali
 +++ b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-@@ -21714,24 +21714,42 @@
-     invoke-static {p0}, Lcom/android/server/wm/Task$$ExternalSyntheticBUOutline0;->m(Ljava/lang/String;)V
- 
-     return-void
- 
-     :cond_2
-     const-string/jumbo p0, "holdLock requires a debuggable build"
- 
-     invoke-static {p0}, Lcom/android/server/wm/Task$$ExternalSyntheticBUOutline0;->m(Ljava/lang/String;)V
- 
+@@ -21724,6 +21724,46 @@
      return-void
  .end method
  
-+.method private static isUnicaDowngradeAllowed(Landroid/content/Context;)Z
-+    .locals 3
++.method private static isUnicaDowngradeAllowed()Z
++    .registers 3
 +
-+    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++    invoke-static {}, Landroid/app/ActivityThread;->currentApplication()Landroid/app/Application;
 +
 +    move-result-object v0
 +
-+    const-string v1, "unica_allow_downgrade"
++    if-nez v0, :cond_get_resolver
++
++    invoke-static {}, Landroid/app/ActivityThread;->currentSystemContext()Landroid/app/ContextImpl;
++
++    move-result-object v0
++
++    if-nez v0, :cond_get_resolver
++
++    const/4 v0, 0x0
++
++    return v0
++
++    :cond_get_resolver
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string/jumbo v1, "unica_allow_downgrade"
 +
 +    const/4 v2, 0x0
 +
@@ -36,57 +45,31 @@ diff --git a/smali_classes2/com/android/server/pm/PackageManagerService.smali b/
 +
 +    move-result v0
 +
-+    return v0
++    if-eqz v0, :cond_done
++
++    const/4 v2, 0x1
++
++    :cond_done
++    return v2
 +.end method
 +
  .method public final verifyReplacingVersionCode(Landroid/content/pm/PackageInfoLite;JI)Landroid/util/Pair;
-     .locals 20
+     .registers 25
  
-     move-object/from16 v5, p1
- 
-     move-wide/from16 v0, p2
- 
-     move-object/from16 v2, p0
- 
-     move/from16 v3, p4
- 
-     iget-object v2, v2, Lcom/android/server/pm/PackageManagerService;->mInstallPackageHelper:Lcom/android/server/pm/InstallPackageHelper;
-@@ -22392,24 +22410,36 @@
- 
-     move-result v0
- 
-     if-nez v0, :cond_e
- 
-     invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->isDebuggable()Z
- 
-     move-result v0
- 
+@@ -22139,6 +22179,14 @@
      invoke-static {v3, v0}, Lcom/android/server/pm/PackageManagerServiceUtils;->isDowngradePermitted(IZ)Z
  
      move-result v0
 +
 +    if-nez v0, :unica_downgrade_checked
 +
-+    move-object/from16 v0, p0
-+
-+    iget-object v0, v0, Lcom/android/server/pm/PackageManagerService;->mContext:Landroid/content/Context;
-+
-+    invoke-static {v0}, Lcom/android/server/pm/PackageManagerService;->isUnicaDowngradeAllowed(Landroid/content/Context;)Z
++    invoke-static {}, Lcom/android/server/pm/PackageManagerService;->isUnicaDowngradeAllowed()Z
 +
 +    move-result v0
 +
 +    :unica_downgrade_checked
-     :try_end_8
-     .catchall {:try_start_8 .. :try_end_8} :catchall_1
+     :try_end_19b
+     .catchall {:try_start_193 .. :try_end_19b} :catchall_12a
  
-     if-nez v0, :cond_c
- 
-     :try_start_9
-     invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->getLongVersionCode()J
- 
-     move-result-wide v0
- 
-     invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->getBaseRevisionCode()I
- 
---
- 2.51.2
+-- 
+2.51.2

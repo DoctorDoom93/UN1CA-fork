@@ -2,48 +2,27 @@ From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: UN1CA <noreply@unica>
 Subject: [PATCH] Allow preloaded system app downgrade
 
-Android 17: anchor the toggle in verifyReplacingVersionCode and retain
-registers and monitor exception coverage.
+Android 17: anchor the toggle in verifyReplacingVersionCode with
+isUnicaDowngradeAllowed helper using ActivityThread context.
 ---
 diff --git a/smali_classes2/com/android/server/pm/PackageManagerService.smali b/smali_classes2/com/android/server/pm/PackageManagerService.smali
+index 6a026b3..b6731a6 100644
 --- a/smali_classes2/com/android/server/pm/PackageManagerService.smali
 +++ b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-@@ -22487,24 +22487,36 @@
-     if-eqz v0, :cond_d
- 
-     iget-object v14, v0, Lcom/android/server/pm/PackageSetting;->pkg:Lcom/android/internal/pm/parsing/pkg/AndroidPackageInternal;
- 
-     :cond_d
-     sget-boolean v0, Landroid/os/Build;->IS_DEBUGGABLE:Z
- 
-     if-nez v0, :cond_e
- 
+@@ -22383,6 +22383,14 @@
      invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->isDebuggable()Z
  
      move-result v0
 +
 +    if-nez v0, :unica_preloaded_downgrade_checked
 +
-+    move-object/from16 v0, p0
-+
-+    iget-object v0, v0, Lcom/android/server/pm/PackageManagerService;->mContext:Landroid/content/Context;
-+
-+    invoke-static {v0}, Lcom/android/server/pm/PackageManagerService;->isUnicaDowngradeAllowed(Landroid/content/Context;)Z
++    invoke-static {}, Lcom/android/server/pm/PackageManagerService;->isUnicaDowngradeAllowed()Z
 +
 +    move-result v0
 +
 +    :unica_preloaded_downgrade_checked
-     :try_end_b
-     .catchall {:try_start_b .. :try_end_b} :catchall_1
+     :try_end_251
+     .catchall {:try_start_22b .. :try_end_251} :catchall_1d3
  
-     if-nez v0, :cond_e
- 
-     :try_start_c
-     invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->getLongVersionCode()J
- 
-     move-result-wide v0
- 
-     invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->getBaseRevisionCode()I
- 
---
- 2.51.2
+-- 
+2.51.2
