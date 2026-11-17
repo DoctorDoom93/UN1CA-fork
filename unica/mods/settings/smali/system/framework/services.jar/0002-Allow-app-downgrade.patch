@@ -6,13 +6,14 @@ Android 17: anchor the toggle in verifyReplacingVersionCode with
 isUnicaDowngradeAllowed helper using ActivityThread context.
 ---
 diff --git a/smali_classes2/com/android/server/pm/PackageManagerService.smali b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-index c1eeb87..6a026b3 100644
+index c075813..d7122da 100644
 --- a/smali_classes2/com/android/server/pm/PackageManagerService.smali
 +++ b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-@@ -21724,6 +21724,46 @@
+@@ -21714,6 +21714,47 @@
      return-void
  .end method
  
++
 +.method private static isUnicaDowngradeAllowed()Z
 +    .registers 3
 +
@@ -53,10 +54,10 @@ index c1eeb87..6a026b3 100644
 +    return v2
 +.end method
 +
- .method public final verifyReplacingVersionCode(Landroid/content/pm/PackageInfoLite;JI)Landroid/util/Pair;
-     .registers 25
+ .method public final updateSequenceNumberLP(Lcom/android/server/pm/PackageSetting;[I)V
+     .locals 6
  
-@@ -22139,6 +22179,14 @@
+@@ -22401,6 +22442,14 @@
      invoke-static {v3, v0}, Lcom/android/server/pm/PackageManagerServiceUtils;->isDowngradePermitted(IZ)Z
  
      move-result v0
@@ -68,8 +69,6 @@ index c1eeb87..6a026b3 100644
 +    move-result v0
 +
 +    :unica_downgrade_checked
-     :try_end_19b
-     .catchall {:try_start_193 .. :try_end_19b} :catchall_12a
+     :try_end_8
+     .catchall {:try_start_8 .. :try_end_8} :catchall_1
  
--- 
-2.51.2

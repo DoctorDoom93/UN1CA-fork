@@ -6,10 +6,10 @@ Android 17: anchor the toggle in verifyReplacingVersionCode with
 isUnicaDowngradeAllowed helper using ActivityThread context.
 ---
 diff --git a/smali_classes2/com/android/server/pm/PackageManagerService.smali b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-index 6a026b3..b6731a6 100644
+index d7122da..90ba5be 100644
 --- a/smali_classes2/com/android/server/pm/PackageManagerService.smali
 +++ b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-@@ -22383,6 +22383,14 @@
+@@ -22545,6 +22545,14 @@
      invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->isDebuggable()Z
  
      move-result v0
@@ -21,8 +21,6 @@ index 6a026b3..b6731a6 100644
 +    move-result v0
 +
 +    :unica_preloaded_downgrade_checked
-     :try_end_251
-     .catchall {:try_start_22b .. :try_end_251} :catchall_1d3
+     :try_end_b
+     .catchall {:try_start_b .. :try_end_b} :catchall_1
  
--- 
-2.51.2
