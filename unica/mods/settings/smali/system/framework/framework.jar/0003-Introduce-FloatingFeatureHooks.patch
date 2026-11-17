@@ -1,3 +1,14 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Fri, 24 Oct 2025 12:00:00 +0200
+Subject: [PATCH] Introduce FloatingFeatureHooks
+
+---
+ smali_classes6/com/samsung/android/feature/SemFloatingFeature.smali | 33 ++++++++++++++++++--
+ smali_classes6/io/mesalabs/unica/FloatingFeatureHooks.smali        | 451 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 481 insertions(+), 3 deletions(-)
+ create mode 100644 smali_classes6/io/mesalabs/unica/FloatingFeatureHooks.smali
+
 diff --git a/smali_classes6/com/samsung/android/feature/SemFloatingFeature.smali b/smali_classes6/com/samsung/android/feature/SemFloatingFeature.smali
 index 9283f6aa..d408aa43 100644
 --- a/smali_classes6/com/samsung/android/feature/SemFloatingFeature.smali
