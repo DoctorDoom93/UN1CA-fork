@@ -89,12 +89,36 @@ GET_RELEASE_ZIP_NAME()
     local SUFFIX="$3"
     local COMMIT
     local RELEASE
-    local ORIGINAL_VERSION="$VERSION"
+    local ROM_VER
+
+    [ -z "$DEVICE" ] && DEVICE="$TARGET_CODENAME"
+    [ -z "$DEVICE" ] && DEVICE="a34x"
 
     VERSION="${VERSION%-dirty}"
-    COMMIT="${VERSION##*-}"
+    if [[ "$VERSION" == *"-"* ]]; then
+        COMMIT="${VERSION##*-}"
+        RELEASE="${VERSION%%-*}"
+        ROM_VER="${RELEASE%+}"
+    else
+        ROM_VER="${VERSION%+}"
+        COMMIT=""
+    fi
+
     if [ -z "$COMMIT" ] || [ "$COMMIT" = "$VERSION" ]; then
         COMMIT="$(git rev-parse --short HEAD 2> /dev/null || echo "null")"
     fi
-    echo "UN1CA_fork_${COMMIT}_${DEVICE}sign.zip"
+
+    if [ -z "$ROM_VER" ]; then
+        if [ -n "$VERSION_MAJOR" ] && [ -n "$VERSION_MINOR" ] && [ -n "$VERSION_PATCH" ]; then
+            ROM_VER="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
+        elif [ -f "$SRC_DIR/unica/configs/version.sh" ]; then
+            # shellcheck source=/dev/null
+            source "$SRC_DIR/unica/configs/version.sh"
+            ROM_VER="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
+        else
+            ROM_VER="4.1.7"
+        fi
+    fi
+
+    echo "UN1CA-fork-${ROM_VER}-${COMMIT}-${DEVICE}-signed.zip"
 }
