@@ -1,26 +1,19 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: UN1CA <noreply@unica>
-Subject: [PATCH] Allow preloaded system app downgrade
-
-Android 17: anchor the toggle in verifyReplacingVersionCode with
-isUnicaDowngradeAllowed helper using ActivityThread context.
----
 diff --git a/smali_classes2/com/android/server/pm/PackageManagerService.smali b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-index d7122da..90ba5be 100644
+index 842feee..c88141b 100644
 --- a/smali_classes2/com/android/server/pm/PackageManagerService.smali
 +++ b/smali_classes2/com/android/server/pm/PackageManagerService.smali
-@@ -22545,6 +22545,14 @@
+@@ -22566,6 +22566,14 @@
      invoke-interface {v14}, Lcom/android/server/pm/pkg/AndroidPackage;->isDebuggable()Z
  
      move-result v0
 +
-+    if-nez v0, :unica_preloaded_downgrade_checked
++    if-nez v0, :cond_preloaded_check
 +
 +    invoke-static {}, Lcom/android/server/pm/PackageManagerService;->isUnicaDowngradeAllowed()Z
 +
 +    move-result v0
 +
-+    :unica_preloaded_downgrade_checked
++    :cond_preloaded_check
      :try_end_b
      .catchall {:try_start_b .. :try_end_b} :catchall_1
  

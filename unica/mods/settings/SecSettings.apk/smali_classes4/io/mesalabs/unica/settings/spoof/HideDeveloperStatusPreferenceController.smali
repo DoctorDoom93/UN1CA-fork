@@ -408,6 +408,14 @@
 .method public setChecked(Z)Z
     .locals 2
 
+    const-string v0, "persist.sys.unica.hide_dev"
+
+    invoke-static {p1}, Ljava/lang/Boolean;->toString(Z)Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Landroid/os/SemSystemProperties;->set(Ljava/lang/String;Ljava/lang/String;)V
+
     iget-object v0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 
     invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;

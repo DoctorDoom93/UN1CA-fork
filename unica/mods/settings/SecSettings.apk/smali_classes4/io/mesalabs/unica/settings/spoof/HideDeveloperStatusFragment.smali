@@ -94,7 +94,15 @@
 .end method
 
 .method public final onCheckedChanged(Landroid/widget/CompoundButton;Z)V
-    .locals 0
+    .locals 2
+
+    const-string v0, "persist.sys.unica.hide_dev"
+
+    invoke-static {p2}, Ljava/lang/Boolean;->toString(Z)Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Landroid/os/SemSystemProperties;->set(Ljava/lang/String;Ljava/lang/String;)V
 
     iget-object p0, p0, Lio/mesalabs/unica/settings/spoof/HideDeveloperStatusFragment;->mContext:Landroid/content/Context;
 

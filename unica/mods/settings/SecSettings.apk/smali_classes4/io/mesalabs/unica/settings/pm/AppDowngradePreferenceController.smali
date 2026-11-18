@@ -95,6 +95,21 @@
 .method public isChecked()Z
     .locals 2
 
+    const-string/jumbo v0, "persist.sys.unica.downgrade"
+
+    const/4 v1, 0x0
+
+    invoke-static {v0, v1}, Landroid/os/SemSystemProperties;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_check_db
+
+    const/4 v0, 0x1
+
+    return v0
+
+    :cond_check_db
     iget-object p0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 
     invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
@@ -102,8 +117,6 @@
     move-result-object p0
 
     const-string v0, "unica_allow_downgrade"
-
-    const/4 v1, 0x0
 
     invoke-static {p0, v0, v1}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
 
@@ -149,7 +162,15 @@
 .end method
 
 .method public setChecked(Z)Z
-    .locals 1
+    .locals 2
+
+    invoke-static {p1}, Ljava/lang/Boolean;->toString(Z)Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string/jumbo v1, "persist.sys.unica.downgrade"
+
+    invoke-static {v1, v0}, Landroid/os/SemSystemProperties;->set(Ljava/lang/String;Ljava/lang/String;)V
 
     iget-object p0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 
