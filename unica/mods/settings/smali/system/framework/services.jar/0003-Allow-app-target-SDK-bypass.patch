@@ -1,45 +1,83 @@
-diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
-index 68ea3d1..45e3183 100644
 --- a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
 +++ b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
-@@ -16280,6 +16280,40 @@
+@@ -16280,6 +16280,13 @@
      const/4 v0, 0x1
  
      :cond_17
-+    const-string/jumbo v15, "persist.sys.unica.sdkbypass"
++    if-nez v0, :cond_check_sdkbypass
 +
-+    const/4 v0, 0x0
-+
-+    invoke-static {v15, v0}, Landroid/os/SemSystemProperties;->getBoolean(Ljava/lang/String;Z)Z
++    invoke-static {}, Lcom/android/server/pm/InstallPackageHelper;->isUnicaSdkBypassAllowed()Z
 +
 +    move-result v0
 +
-+    if-eqz v0, :cond_check_sdkbypass_system
++    :cond_check_sdkbypass
+     if-nez v0, :cond_19
+ 
+     invoke-interface {v3}, Lcom/android/internal/pm/parsing/pkg/ParsedPackage;->getTargetSdkVersion()I
+@@ -24888,3 +24895,66 @@
+ 
+     throw v0
+ .end method
 +
-+    goto :cond_19
 +
-+    :cond_check_sdkbypass_system
-+    iget-object v0, v1, Lcom/android/server/pm/InstallPackageHelper;->mContext:Landroid/content/Context;
++.method public static isUnicaSdkBypassAllowed()Z
++    .locals 3
 +
-+    if-eqz v0, :cond_orig_sdk_check
++    const-string/jumbo v0, "persist.sys.unica.sdkbypass"
 +
++    const/4 v1, 0x0
++
++    invoke-static {v0, v1}, Landroid/os/SemSystemProperties;->getBoolean(Ljava/lang/String;Z)Z
++
++    move-result v0
++
++    if-eqz v0, :cond_check_resolver
++
++    const/4 v0, 0x1
++
++    return v0
++
++    :cond_check_resolver
++    invoke-static {}, Landroid/app/ActivityThread;->currentApplication()Landroid/app/Application;
++
++    move-result-object v0
++
++    if-nez v0, :cond_get_resolver
++
++    invoke-static {}, Landroid/app/ActivityThread;->currentSystemContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    if-nez v0, :cond_get_resolver
++
++    const/4 v0, 0x0
++
++    return v0
++
++    :cond_get_resolver
 +    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 +
 +    move-result-object v0
 +
-+    if-eqz v0, :cond_orig_sdk_check
++    if-nez v0, :cond_read_setting
 +
-+    const-string/jumbo v15, "unica_allow_sdkbypass"
++    const/4 v0, 0x0
 +
-+    invoke-static {v0, v15, v8}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++    return v0
++
++    :cond_read_setting
++    const-string/jumbo v1, "unica_allow_sdkbypass"
++
++    const/4 v2, 0x0
++
++    invoke-static {v0, v1, v2}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
 +
 +    move-result v0
 +
-+    if-eqz v0, :cond_orig_sdk_check
++    if-eqz v0, :cond_done
 +
-+    goto :cond_19
++    const/4 v2, 0x1
 +
-+    :cond_orig_sdk_check
-     if-nez v0, :cond_19
- 
-     invoke-interface {v3}, Lcom/android/internal/pm/parsing/pkg/ParsedPackage;->getTargetSdkVersion()I
++    :cond_done
++    return v2
++.end method
