@@ -269,6 +269,83 @@ if [ -d "$MODPATH/troubleshooting" ]; then
     [ -f "$WORK_DIR/system/system/bin/unica-troubleshooting" ] && SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"
 fi
 
+# Allow runtime camera feature override in SamsungCamera
+if [ -f "$WORK_DIR/system/system/priv-app/SamsungCamera/SamsungCamera.apk" ]; then
+    DECODE_APK "system" "system/priv-app/SamsungCamera/SamsungCamera.apk"
+    LOG "- Hooking SamsungCamera runtime camera feature override"
+    python3 - "$APKTOOL_DIR/system/priv-app/SamsungCamera/SamsungCamera.apk" << 'EOF'
+import sys, re
+from pathlib import Path
+
+apk_dir = Path(sys.argv[1])
+for smali_file in apk_dir.rglob("*.smali"):
+    content = smali_file.read_text(encoding="utf-8", errors="ignore")
+    if "FeatureLoader" in content and "loadFeature : start" in content:
+        if "getCameraFeatureFile" in content:
+            break
+
+        m_class = re.search(r'^\.class\s+.*?([L][^;\s]+;)', content, re.MULTILINE)
+        if not m_class:
+            continue
+        class_desc = m_class.group(1)
+
+        m_fis = re.search(r'invoke-direct\s*\{[^,]+,\s*(v\d+)\},\s*Ljava/io/FileInputStream;-><init>\(Ljava/io/File;\)V', content)
+        if not m_fis:
+            continue
+
+        file_reg = m_fis.group(1)
+        pattern_init = re.compile(
+            rf'(invoke-direct\s*\{{{file_reg},\s*v\d+\}},\s*Ljava/io/File;-><init>\(Ljava/lang/String;\)V)',
+            re.MULTILINE
+        )
+
+        sub_content = content[:m_fis.start()]
+        matches = list(pattern_init.finditer(sub_content))
+        if not matches:
+            continue
+
+        insert_pos = matches[-1].end()
+        hook = f"\n\n    invoke-static {{{file_reg}}}, {class_desc}->getCameraFeatureFile(Ljava/io/File;)Ljava/io/File;\n\n    move-result-object {file_reg}"
+
+        helper_method = """
+
+.method private static getCameraFeatureFile(Ljava/io/File;)Ljava/io/File;
+    .registers 7
+
+    new-instance v0, Ljava/io/File;
+
+    const-string v1, "/sdcard/Download/unica/unica_camera_feature.xml"
+
+    invoke-direct {v0, v1}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0}, Ljava/io/File;->exists()Z
+
+    move-result v2
+
+    if-eqz v2, :cond_unica_stock
+
+    invoke-virtual {v0}, Ljava/io/File;->length()J
+
+    move-result-wide v2
+
+    const-wide/16 v4, 0x0
+
+    cmp-long v2, v2, v4
+
+    if-lez v2, :cond_unica_stock
+
+    return-object v0
+
+    :cond_unica_stock
+    return-object p0
+.end method
+"""
+        new_content = content[:insert_pos] + hook + content[insert_pos:] + helper_method
+        smali_file.write_text(new_content, encoding="utf-8")
+        break
+EOF
+fi
+
 unset PATCH_INST CONTENT SW_UTILS ONEUI_CONTROLLER MODEL_GETTER TOP_KEYS
 
 LOG_STEP_OUT
