@@ -9,8 +9,11 @@
 /system/etc/init/rezoss_mosey_permissions\.rc u:object_r:system_file:s0
 /system/etc/default-permissions u:object_r:system_file:s0
 /system/etc/default-permissions/default-permissions-com\.google\.android\.mosey\.xml u:object_r:system_file:s0
+/system/etc/default-permissions/default-permissions-com\.samsung\.android\.scs\.xml u:object_r:system_file:s0
+/system/etc/sysconfig(/.*)? u:object_r:system_file:s0
 /system/etc/permissions u:object_r:system_file:s0
 /system/etc/permissions/privapp-permissions-com\.samsung\.android\.applock\.xml u:object_r:system_file:s0
+/system/etc/permissions/privapp-permissions-com\.samsung\.android\.scs\.xml u:object_r:system_file:s0
 /system/etc/permissions/privapp-permissions-com\.samsung\.android\.sm_cn\.xml u:object_r:system_file:s0
 /system/etc/permissions/privapp-permissions-com\.sec\.android\.app\.firewall\.xml u:object_r:system_file:s0
 /system/etc/permissions/signature-permissions-com\.samsung\.android\.sm_cn\.xml u:object_r:system_file:s0

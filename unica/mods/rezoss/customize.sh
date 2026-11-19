@@ -83,12 +83,16 @@ if [ -d "$MODPATH/system/priv-app/SamsungSmartSuggestions" ]; then
     LOG "- Installing Galaxy AI SmartSuggestions donor APK"
     ADD_TO_WORK_DIR "$MODPATH" "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" 0 0 644 "u:object_r:system_file:s0"
 fi
-if [ -f "$MODPATH/system/etc/sysconfig/samsungsmartsuggestions.xml" ]; then
-    ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/sysconfig/samsungsmartsuggestions.xml" 0 0 644 "u:object_r:system_file:s0"
-fi
-for scs_xml in default-permissions-com.samsung.android.scs.xml privapp-permissions-com.samsung.android.scs.xml signature-permissions-com.samsung.android.scs.xml preinstalled-packages-com.samsung.android.scs.xml samsungintellivoiceservice.xml; do
-    if [ -f "$MODPATH/system/etc/$scs_xml" ]; then
-        ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/$scs_xml" 0 0 644 "u:object_r:system_file:s0"
+for scs_xml in \
+    "system/etc/sysconfig/samsungsmartsuggestions.xml" \
+    "system/etc/sysconfig/samsungintellivoiceservice.xml" \
+    "system/etc/sysconfig/preinstalled-packages-com.samsung.android.scs.xml" \
+    "system/etc/sysconfig/rezoss-ai-associations.xml" \
+    "system/etc/default-permissions/default-permissions-com.samsung.android.scs.xml" \
+    "system/etc/permissions/privapp-permissions-com.samsung.android.scs.xml" \
+    "system/etc/permissions/signature-permissions-com.samsung.android.scs.xml"; do
+    if [ -f "$MODPATH/$scs_xml" ]; then
+        ADD_TO_WORK_DIR "$MODPATH" "system" "$scs_xml" 0 0 644 "u:object_r:system_file:s0"
     fi
 done
 

@@ -1,19 +1,43 @@
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text eol=lf
 
+# Explicit text sources
+*.sh text eol=lf
+*.patch text eol=lf
+*.py text eol=lf
+*.xml text eol=lf
+*.json text eol=lf
+*.tsv text eol=lf
+*.smali text eol=lf
+*.rc text eol=lf
+*.cil text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+fs_config-* text eol=lf
+file_context-* text eol=lf
+
 # Denote all files that are truly binary and should not be modified.
+
+# Split binary chunks
+*.[0-9][0-9] binary
+*.[0-9][0-9][0-9] binary
 
 # Common file extensions
 *.apk binary
 *.apk.* binary
 *.apex binary
+*.apex.* binary
+*.jar binary
+*.jar.* binary
+*.zip binary
+*.7z binary
 *.bin binary
 *.so binary
+*.so.* binary
 *.ko binary
 *.img binary
 *.dtb binary
 *.dtbo binary
-*.jar binary
 *.pk8 binary
 *.ogg binary
 *.ico binary
@@ -22,6 +46,14 @@
 *.qmg binary
 *.webp binary
 
+# Machine learning models, lookups, and calibration assets
+*.tflite binary
+*.tflite.* binary
+*.dlc binary
+*.cube binary
+*.bcube binary
+*.sni binary
+
 # ROM-specific prebuilt blobs
 prebuilts/bootable/deprecated-ota/updater binary
 prebuilts/*/*/*/** binary
@@ -29,6 +61,7 @@ unica/mods/paradigm/system/** binary
 unica/mods/rezoss/system/** binary
 unica/mods/prophide/system/bin/rezetprop binary
 unica/mods/rezoss/local-summary-service/system/bin/** binary
+unica/mods/settings/system/bin/** binary
 
 # Device-specific prebuilt blobs
 target/a34x/patches/kernel_modules/** binary
