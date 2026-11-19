@@ -79,6 +79,14 @@ fi
 # =============================================================================
 # 5. SmartSuggestions, Now Nudge & Reply Routing
 # =============================================================================
+# S26U Galaxy AI, Now Brief and Now Nudge floating feature requirements
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_CONFIG_AI_VERSION" "20263"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_NOW_NUDGE_VERSION" "2"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GENAI_CONFIG_LLM_VERSION" "0.81"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GENAI_SUPPORT_OFFLINE_LANGUAGEMODEL" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_PERSONALIZED_DATA_CORE" "TRUE"
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_AI_BRIEF_FOR_UT" "TRUE"
+
 if [ -d "$MODPATH/system/priv-app/SamsungSmartSuggestions" ]; then
     LOG "- Installing Galaxy AI SmartSuggestions donor APK"
     ADD_TO_WORK_DIR "$MODPATH" "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" 0 0 644 "u:object_r:system_file:s0"
