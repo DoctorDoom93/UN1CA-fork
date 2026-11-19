@@ -11,4 +11,5 @@ persist.sys.pif.tags=release-keys
 persist.sys.pif.manufacturer=Google
 persist.sys.pif.model=Pixel 6a
 persist.sys.pif.security_patch=2024-02-05
-persist.sys.pif.first_api_level=32
+persist.sys.pif.first_api_level=25
+persist.sys.pif.vending_build=true
