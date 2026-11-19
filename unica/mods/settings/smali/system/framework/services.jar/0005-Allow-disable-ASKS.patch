@@ -84,7 +84,7 @@ index ca6c65d..b838184 100644
 +
 +    if-nez v0, :cond_asks_verify_orig
 +
-+    const/4 v0, 0x0
++    const/4 v0, -0x1
 +
 +    return v0
 +

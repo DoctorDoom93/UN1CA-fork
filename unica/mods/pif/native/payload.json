@@ -3,7 +3,7 @@
   "source_sdk": 37,
   "sources": {
     "native/build_native.py": "c1316e1ca165c8045caadbfb8f73345433c57dbe19846e742470a575f1e31ea9",
-    "framework.jar/0001-Introduce-PlayIntegrityHooks.patch": "eea6ac6496a0f58aa3bb6fa20dea75c8086e9ae33fdabfa79dba2754d2ec85c3",
+    "framework.jar/0001-Introduce-PlayIntegrityHooks.patch": "ca1714cae53c688ae53221a7dca68cba313a9ee2f6298deab5ed5ef39757b940",
     "framework.jar/0002-Spoof-PIF-system-properties.patch": "345442f0cf26ff1eb3eab4d7860c9e9964b93f452a5d6b5c1345560df421092b",
     "native/source/bridge.cpp": "326274f85b02665414915337cb2bdbc7c0459bf3f9874f131c1d5c49cdfe0609",
     "native/source/java/io/mesalabs/unica/PifProcessHooks.java": "aa23147ada658b430a85b5c7896b1dfb0ac9dd049659e895c93484294623298f",
