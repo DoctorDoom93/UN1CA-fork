@@ -1,5 +1,6 @@
 # Fix Edge Lighting corner radius
 # Remove SM-M127 support to support SM-A346 instead
+DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk"
 DRAW_EDGE="$(find "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk" -type f -name "DrawEdgeLayout.smali" 2>/dev/null | head -n 1)"
 if [ -n "$DRAW_EDGE" ] && [ -f "$DRAW_EDGE" ]; then
     SMALI_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
@@ -10,9 +11,13 @@ if [ -n "$DRAW_EDGE" ] && [ -f "$DRAW_EDGE" ]; then
 fi
 unset DRAW_EDGE
 
-LOG "- Patching /system_ext/priv-app/SystemUI/SystemUI.apk/res/values/dimens.xml"
-EVAL "sed -i \"s/<dimen name\=\\\"sm_m127\\\">36.0dp<\/dimen>/<dimen name\=\\\"sm_a346\\\">40.0dp<\/dimen>/\" \"$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/res/values/dimens.xml\""
-LOG "- Patching /system_ext/priv-app/SystemUI/SystemUI.apk/res/values/public.xml"
-EVAL "sed -i \"s/<public type\=\\\"dimen\\\" name\=\\\"sm_m127\\\"/<public type\=\\\"dimen\\\" name\=\\\"sm_a346\\\"/\" \"$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/res/values/public.xml\""
+if [ -f "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/res/values/dimens.xml" ]; then
+    LOG "- Patching /system_ext/priv-app/SystemUI/SystemUI.apk/res/values/dimens.xml"
+    EVAL "sed -i \"s/<dimen name\=\\\"sm_m127\\\">36.0dp<\/dimen>/<dimen name\=\\\"sm_a346\\\">40.0dp<\/dimen>/\" \"$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/res/values/dimens.xml\""
+fi
+if [ -f "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/res/values/public.xml" ]; then
+    LOG "- Patching /system_ext/priv-app/SystemUI/SystemUI.apk/res/values/public.xml"
+    EVAL "sed -i \"s/<public type\=\\\"dimen\\\" name\=\\\"sm_m127\\\"/<public type\=\\\"dimen\\\" name\=\\\"sm_a346\\\"/\" \"$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/res/values/public.xml\""
+fi
 
 SET_PROP "system" "ro.factory.model" "SM-A346B"

@@ -27,18 +27,6 @@ if [ -n "$SW_UTILS" ] && [ -f "$SW_UTILS" ]; then
     fi
 fi
 
-# Ensure all classes defining isOTAUpgradeAllowed(Context) return false to thoroughly block stock OTA
-while IFS= read -r match_file; do
-    [ -z "$match_file" ] && continue
-    rel_file="${match_file#"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/"}"
-    if [ "$rel_file" != "$REL_SW_UTILS" ]; then
-        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$rel_file" "return" \
-            'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
-            'false'
-    fi
-done < <(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -type f -name "*.smali" -exec grep -l "^\.method.*isOTAUpgradeAllowed(Landroid/content/Context;)Z" {} + 2>/dev/null)
-
 # Dynamically patch SecSettings
 # - Add missing/non-xml files in place
 # - Patch existing files
