@@ -132,6 +132,81 @@ SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     'const-string v0, "io.mesalabs.unica."\n\n    invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z\n\n    move-result v0\n\n    if-eqz v0, :cond_unica_valid\n\n    const/4 v0, 0x1\n\n    return v0\n\n    :cond_unica_valid\n    const/4 p0, 0x0' \
     > /dev/null
 
+# Add UN1CA permissions to SecSettings AndroidManifest.xml
+SETTINGS_MANIFEST="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/AndroidManifest.xml"
+if [ -f "$SETTINGS_MANIFEST" ]; then
+    for PERM in \
+        "io.mesalabs.rezoss.permission.QWEN_ENGINE" \
+        "android.permission.READ_LOGS" \
+        "android.permission.QUERY_ALL_PACKAGES" \
+        "android.permission.KILL_UID" \
+        "android.permission.ACCESS_SHORTCUTS" \
+        "com.android.alarm.permission.SET_ALARM"; do
+        if ! grep -q "android:name=\"$PERM\"" "$SETTINGS_MANIFEST"; then
+            sed -i "/<\/manifest>/i \    <uses-permission android:name=\"$PERM\"/>" "$SETTINGS_MANIFEST"
+        fi
+    done
+fi
+
+# Hook Settings background transparency into SecSettingsBaseActivity
+BASE_ACTIVITY="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -name "SecSettingsBaseActivity.smali" -print -quit)"
+if [ -n "$BASE_ACTIVITY" ]; then
+    LOG "- Hooking Settings background transparency into ${BASE_ACTIVITY#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
+    python3 - "$BASE_ACTIVITY" << 'EOF'
+import sys
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+hook = '    invoke-static {p0}, Lio/mesalabs/unica/settings/display/SettingsBackgroundTransparencyUtils;->apply(Landroid/content/Context;)V\n'
+new_lines = []
+in_target_method = False
+
+for line in lines:
+    if line.startswith('.method ') and (' onCreate(' in line or ' onResume(' in line):
+        in_target_method = True
+    elif line.startswith('.end method'):
+        in_target_method = False
+    elif in_target_method and line.strip() == 'return-void':
+        if not any('SettingsBackgroundTransparencyUtils;->apply' in l for l in new_lines[-5:]):
+            new_lines.append(hook)
+    new_lines.append(line)
+
+with open(path, 'w', encoding='utf-8') as f:
+    f.writelines(new_lines)
+EOF
+fi
+
+# Hook Quick Tiles routeLongPress into QSTileLongPressGatewayActivity
+QS_GATEWAY="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -name "QSTileLongPressGatewayActivity.smali" -print -quit)"
+if [ -n "$QS_GATEWAY" ]; then
+    LOG "- Hooking Quick Tiles into ${QS_GATEWAY#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
+    python3 - "$QS_GATEWAY" << 'EOF'
+import sys
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+target = 'invoke-super {p0, p1}, Landroidx/fragment/app/FragmentActivity;->onCreate(Landroid/os/Bundle;)V'
+replacement = target + '''
+
+    invoke-static {p0}, Lio/mesalabs/unica/quicktiles/TileConfig;->routeLongPress(Landroid/app/Activity;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_unica_quick_tile_stock
+
+    return-void
+
+    :cond_unica_quick_tile_stock'''
+
+if target in content and 'routeLongPress' not in content:
+    content = content.replace(target, replacement, 1)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+EOF
+fi
+
 if [ -f "$WORK_DIR/system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" ]; then
     DECODE_APK "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
     TOP_KEYS="smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali"

@@ -11,26 +11,32 @@ LOG_STEP_IN "- Applying Rezoss Enhancements & Galaxy AI Suite"
 if [ -f "$WORK_DIR/system/system/priv-app/DressRoom/DressRoom.apk" ]; then
     LOG "- Patching DressRoom for Photo Ambient (Weather) Wallpaper and typography"
     APPLY_PATCH "system" "system/priv-app/DressRoom/DressRoom.apk" \
-        "$MODPATH/dressroom/DressRoom.apk/0001-Bypass-AICore-weather-feature-check.patch"
+        "$MODPATH/dressroom/DressRoom.apk/0001-Bypass-AICore-weather-feature-check.patch" || true
     APPLY_PATCH "system" "system/priv-app/DressRoom/DressRoom.apk" \
-        "$MODPATH/dressroom/DressRoom.apk/0002-Expose-UN1CA-selected-fonts-to-lockscreen-picker.patch"
+        "$MODPATH/dressroom/DressRoom.apk/0002-Expose-UN1CA-selected-fonts-to-lockscreen-picker.patch" || true
     APPLY_PATCH "system" "system/priv-app/DressRoom/DressRoom.apk" \
-        "$MODPATH/dressroom/DressRoom.apk/0003-Add-clock-height-and-widget-size-controls.patch"
+        "$MODPATH/dressroom/DressRoom.apk/0003-Add-clock-height-and-widget-size-controls.patch" || true
 fi
 
 if [ -f "$WORK_DIR/system/system/priv-app/SamsungAiCore/SamsungAiCore.apk" ]; then
     LOG "- Guarding SamsungAiCore wallpaper pipeline"
     APPLY_PATCH "system" "system/priv-app/SamsungAiCore/SamsungAiCore.apk" \
-        "$MODPATH/aicore/SamsungAiCore.apk/0003-Disable-crashing-wallpaper-pipeline.patch"
+        "$MODPATH/aicore/SamsungAiCore.apk/0003-Disable-crashing-wallpaper-pipeline.patch" || true
 fi
 
 # =============================================================================
 # 2. Cloud Galaxy AI Suite (Generative Edit, Sketch to Image, Portrait Studio)
 # =============================================================================
-if [ -f "$WORK_DIR/system/system/priv-app/VisualCloudCore/VisualCloudCore.apk" ]; then
+VCC_APK=""
+if [ -f "$WORK_DIR/system/system/app/VisualCloudCore/VisualCloudCore.apk" ]; then
+    VCC_APK="system/app/VisualCloudCore/VisualCloudCore.apk"
+elif [ -f "$WORK_DIR/system/system/priv-app/VisualCloudCore/VisualCloudCore.apk" ]; then
+    VCC_APK="system/priv-app/VisualCloudCore/VisualCloudCore.apk"
+fi
+if [ -n "$VCC_APK" ]; then
     LOG "- Patching VisualCloudCore for Cloud Galaxy AI features"
-    APPLY_PATCH "system" "system/priv-app/VisualCloudCore/VisualCloudCore.apk" \
-        "$MODPATH/visualcloudcore/VisualCloudCore.apk/0001-Use-S25-Ultra-model-for-stub-update-check.patch"
+    APPLY_PATCH "system" "$VCC_APK" \
+        "$MODPATH/visualcloudcore/VisualCloudCore.apk/0001-Use-S25-Ultra-model-for-stub-update-check.patch" || true
 fi
 
 # =============================================================================
@@ -39,7 +45,7 @@ fi
 if [ -f "$WORK_DIR/system/system/priv-app/SamsungIntelliVoiceServices/SamsungIntelliVoiceServices.apk" ]; then
     LOG "- Patching SamsungIntelliVoiceServices for Now Brief and custom cards"
     APPLY_PATCH "system" "system/priv-app/SamsungIntelliVoiceServices/SamsungIntelliVoiceServices.apk" \
-        "$MODPATH/sivs/SamsungIntelliVoiceServices.apk/0001-Use-S26U-device-model-for-SCS-requests.patch"
+        "$MODPATH/sivs/SamsungIntelliVoiceServices.apk/0001-Use-S26U-device-model-for-SCS-requests.patch" || true
 fi
 
 # =============================================================================
@@ -65,7 +71,7 @@ if [ -f "$WORK_DIR/system/system/priv-app/SamsungSmartSuggestions/SamsungSmartSu
     LOG "- Patching SamsungSmartSuggestions for Now Nudge and extended messengers"
     for p in "$MODPATH/smartsuggestions/SamsungSmartSuggestions.apk/"*.patch; do
         [ -f "$p" ] || continue
-        APPLY_PATCH "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" "$p"
+        APPLY_PATCH "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" "$p" || true
     done
 fi
 
