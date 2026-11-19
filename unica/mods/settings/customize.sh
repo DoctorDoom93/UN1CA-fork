@@ -22,9 +22,9 @@ DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
 # Disable stock OTA references
 if [ ! -f "$WORK_DIR/system/system/priv-app/ChoiDujour/ChoiDujour.apk" ]; then
-    SW_UTILS="smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali"
-    [ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$SW_UTILS" ] && SW_UTILS="smali_classes5/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali"
-    if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$SW_UTILS" ] && grep -q "isOTAUpgradeAllowed" "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$SW_UTILS"; then
+    SW_UTILS_FILE="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -type f -name "SoftwareUpdateUtils.smali" 2>/dev/null | head -n 1)"
+    if [ -n "$SW_UTILS_FILE" ] && [ -f "$SW_UTILS_FILE" ] && grep -q "isOTAUpgradeAllowed" "$SW_UTILS_FILE"; then
+        SW_UTILS="${SW_UTILS_FILE#"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/"}"
         SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
             "$SW_UTILS" "return" \
             'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
@@ -33,9 +33,9 @@ if [ ! -f "$WORK_DIR/system/system/priv-app/ChoiDujour/ChoiDujour.apk" ]; then
 fi
 
 # Always show One UI minor version
-ONEUI_CONTROLLER="smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali"
-[ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$ONEUI_CONTROLLER" ] && ONEUI_CONTROLLER="smali_classes5/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali"
-if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$ONEUI_CONTROLLER" ]; then
+ONEUI_CONTROLLER_FILE="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -type f -name "OneUIVersionPreferenceController.smali" 2>/dev/null | head -n 1)"
+if [ -n "$ONEUI_CONTROLLER_FILE" ] && [ -f "$ONEUI_CONTROLLER_FILE" ]; then
+    ONEUI_CONTROLLER="${ONEUI_CONTROLLER_FILE#"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/"}"
     SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
         "$ONEUI_CONTROLLER" "replace" \
         'isDeviceWithMicroVersion()Z' \
@@ -44,9 +44,9 @@ if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$ONEUI_CONTROL
 fi
 
 # Show real device model number
-MODEL_GETTER="smali_classes3/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali"
-[ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$MODEL_GETTER" ] && MODEL_GETTER="smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali"
-if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$MODEL_GETTER" ]; then
+MODEL_GETTER_FILE="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -type f -name "ModelNameGetter.smali" 2>/dev/null | head -n 1)"
+if [ -n "$MODEL_GETTER_FILE" ] && [ -f "$MODEL_GETTER_FILE" ]; then
+    MODEL_GETTER="${MODEL_GETTER_FILE#"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/"}"
     SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
         "$MODEL_GETTER" "replace" \
         'getModelName()Ljava/lang/String;' \
@@ -222,8 +222,9 @@ fi
 
 if [ -f "$WORK_DIR/system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" ]; then
     DECODE_APK "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
-    TOP_KEYS="smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali"
-    if [ -f "$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/$TOP_KEYS" ]; then
+    TOP_KEYS_FILE="$(find "$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" -type f -name "TopLevelKeysCollector.smali" 2>/dev/null | head -n 1)"
+    if [ -n "$TOP_KEYS_FILE" ] && [ -f "$TOP_KEYS_FILE" ]; then
+        TOP_KEYS="${TOP_KEYS_FILE#"$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/"}"
         LOG "- Patching \"$TOP_KEYS\" in /system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
         if grep -q "filled-new-array/range {v1 .. v36}" "$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/$TOP_KEYS"; then
             SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
@@ -359,6 +360,6 @@ for smali_file in apk_dir.rglob("*.smali"):
 EOF
 fi
 
-unset PATCH_INST CONTENT SW_UTILS ONEUI_CONTROLLER MODEL_GETTER TOP_KEYS
+unset PATCH_INST CONTENT SW_UTILS ONEUI_CONTROLLER MODEL_GETTER TOP_KEYS SW_UTILS_FILE ONEUI_CONTROLLER_FILE MODEL_GETTER_FILE TOP_KEYS_FILE
 
 LOG_STEP_OUT

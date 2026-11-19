@@ -15,9 +15,29 @@ APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     "$MODPATH/suggestions/SecSettings.apk/0001-Launch-UN1CA-Updates-from-suggestions.patch"
 
 # Disable stock OTA references
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
-    "isOTAUpgradeAllowed(Landroid/content/Context;)Z" "false"
+SW_UTILS="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -type f -name "SoftwareUpdateUtils.smali" 2>/dev/null | head -n 1)"
+REL_SW_UTILS=""
+if [ -n "$SW_UTILS" ] && [ -f "$SW_UTILS" ]; then
+    REL_SW_UTILS="${SW_UTILS#"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/"}"
+    if grep -q "isOTAUpgradeAllowed" "$SW_UTILS"; then
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$REL_SW_UTILS" "return" \
+            'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
+            'false'
+    fi
+fi
+
+# Ensure all classes defining isOTAUpgradeAllowed(Context) return false to thoroughly block stock OTA
+while IFS= read -r match_file; do
+    [ -z "$match_file" ] && continue
+    rel_file="${match_file#"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/"}"
+    if [ "$rel_file" != "$REL_SW_UTILS" ]; then
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$rel_file" "return" \
+            'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
+            'false'
+    fi
+done < <(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -type f -name "*.smali" -exec grep -l "^\.method.*isOTAUpgradeAllowed(Landroid/content/Context;)Z" {} + 2>/dev/null)
 
 # Dynamically patch SecSettings
 # - Add missing/non-xml files in place
@@ -47,4 +67,4 @@ while IFS= read -r f; do
     fi
 done < <(find "$MODPATH/SecSettings.apk" -type f)
 
-unset PATCH_INST CONTENT
+unset PATCH_INST CONTENT SW_UTILS REL_SW_UTILS

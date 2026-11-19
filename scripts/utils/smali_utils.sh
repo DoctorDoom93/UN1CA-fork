@@ -70,15 +70,34 @@ SMALI_PATCH()
     fi
 
     local FILE_PATH="$APKTOOL_DIR/$PARTITION/${FILE//system\//}"
+    local REL_SMALI="${SMALI#smali*/}"
+    REL_SMALI="${REL_SMALI#smali/}"
 
     # Auto-resolve smali file if it moved across multidex partitions (e.g. smali -> smali_classes2/smali_classes4/smali_classes5)
     if [ ! -f "$FILE_PATH/$SMALI" ]; then
-        local REL_SMALI="${SMALI#smali*/}"
-        REL_SMALI="${REL_SMALI#smali/}"
         local MATCH
         MATCH="$(find "$FILE_PATH" -type f -path "*/$REL_SMALI" 2>/dev/null | head -n 1)"
         if [ -n "$MATCH" ] && [ -f "$MATCH" ]; then
             SMALI="${MATCH#"$FILE_PATH/"}"
+        fi
+    fi
+
+    # If method is specified (not replaceall), verify if current smali defines it.
+    # If not, attempt to find a multidex peer for the same class that contains the method.
+    if [[ "$OPERATION" != "replaceall" ]] && [ -n "$METHOD" ]; then
+        if [ ! -f "$FILE_PATH/$SMALI" ] || ! grep "^\.method.*" "$FILE_PATH/$SMALI" 2>/dev/null | grep -q -F -- "$METHOD"; then
+            local PEER_MATCH
+            while IFS= read -r cand; do
+                [ -z "$cand" ] && continue
+                if grep "^\.method.*" "$cand" 2>/dev/null | grep -q -F -- "$METHOD"; then
+                    PEER_MATCH="$cand"
+                    break
+                fi
+            done < <(find "$FILE_PATH" -type f -path "*/$REL_SMALI" 2>/dev/null)
+
+            if [ -n "$PEER_MATCH" ] && [ -f "$PEER_MATCH" ]; then
+                SMALI="${PEER_MATCH#"$FILE_PATH/"}"
+            fi
         fi
     fi
 
@@ -123,7 +142,7 @@ SMALI_PATCH()
         LOGE "Method \"$METHOD\" not found in /$PARTITION/$FILE/$SMALI"
 
         local MATCHES
-        MATCHES="$(grep -r "^\.method.*$METHOD" "$FILE_PATH")"
+        MATCHES="$(find "$FILE_PATH" -type f -name "*.smali" 2>/dev/null | while read -r cand; do grep "^\.method.*" "$cand" 2>/dev/null | grep -F -- "$METHOD" >/dev/null && echo "$cand"; done)"
 
         if [ "$MATCHES" ]; then
             echo -e "\n\033[0;31mPossible matches?" >&2
