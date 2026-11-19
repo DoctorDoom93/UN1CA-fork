@@ -82,5 +82,12 @@ if [ -d "$MODPATH/local-summary-service/system" ]; then
     ADD_TO_WORK_DIR "$MODPATH/local-summary-service" "system" "." 0 0 755 "u:object_r:system_file:s0"
 fi
 
+# =============================================================================
+# 7. Scheduled Power On / Off
+# =============================================================================
+if [ -f "$MODPATH/scheduled-power-on/integrate.sh" ] && [ ! -f "$MODPATH/scheduled-power-on/disable" ]; then
+    source "$MODPATH/scheduled-power-on/integrate.sh" || true
+fi
+
 LOG_STEP_OUT
 return 0

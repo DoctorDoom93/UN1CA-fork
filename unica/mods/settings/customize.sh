@@ -172,6 +172,28 @@ if [[ "$(GET_PROP "ro.hwui.use_vulkan")" != "true" ]]; then
     SET_PROP "system" "persist.sys.unica.vulkan" "false"
 fi
 
+# Relax SDHMS policy control
+if [ -d "$MODPATH/thermal" ] && [ -f "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" ]; then
+    LOG "- Installing Relax SDHMS policy control"
+    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" || true
+fi
+
+# Troubleshooting suite
+if [ -d "$MODPATH/troubleshooting" ]; then
+    LOG "- Compiling Troubleshooting compatibility catalog and policies"
+    python3 "$MODPATH/troubleshooting/compile-catalog.py" \
+        --output-dir "$WORK_DIR/system/system/etc/unica" --no-backup 2>/dev/null || true
+    for _UNICA_COMPAT_TABLE in troubleshooting-root-purposes.tsv troubleshooting-lsposed-purposes.json troubleshooting-lsposed-conflicts.json troubleshooting-registry-info.json; do
+        [ -f "$WORK_DIR/system/system/etc/unica/$_UNICA_COMPAT_TABLE" ] && SET_METADATA "system" "system/etc/unica/$_UNICA_COMPAT_TABLE" 0 0 644 "u:object_r:system_file:s0"
+    done
+    unset _UNICA_COMPAT_TABLE
+    python3 "$MODPATH/troubleshooting/install-policy.py" "$WORK_DIR" 2>/dev/null || true
+    python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" 2>/dev/null || true
+    [ -f "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" ] && SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"
+    [ -f "$WORK_DIR/system/system/bin/unica-troubleshooting" ] && SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"
+fi
+
 unset PATCH_INST CONTENT SW_UTILS ONEUI_CONTROLLER MODEL_GETTER TOP_KEYS
 
 LOG_STEP_OUT
