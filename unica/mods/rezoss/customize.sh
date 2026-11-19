@@ -150,5 +150,12 @@ if [ -f "$MODPATH/scheduled-power-on/integrate.sh" ] && [ ! -f "$MODPATH/schedul
     source "$MODPATH/scheduled-power-on/integrate.sh" || true
 fi
 
+# =============================================================================
+# 8. Experimental Horizontal Lock (Native EIS Horizon Adapter)
+# =============================================================================
+if [ -f "$MODPATH/horizontal-lock/install.sh" ]; then
+    . "$MODPATH/horizontal-lock/install.sh" || true
+fi
+
 LOG_STEP_OUT
 return 0
