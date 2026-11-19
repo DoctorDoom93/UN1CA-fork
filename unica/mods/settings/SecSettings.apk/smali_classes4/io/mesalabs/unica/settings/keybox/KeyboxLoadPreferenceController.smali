@@ -171,17 +171,15 @@
 
     iget-object v0, p0, Lio/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController;->mContext:Landroid/content/Context;
 
-    const-string p0, "application/xml"
+    const-string p0, "xml"
 
-    const-string v1, "text/xml"
-
-    filled-new-array {p0, v1}, [Ljava/lang/String;
+    filled-new-array {p0}, [Ljava/lang/String;
 
     move-result-object p0
 
     const/4 v1, 0x0
 
-    invoke-static {v0, p0, v1}, Lio/mesalabs/unica/utils/Utils;->getFilePickerOpenIntent(Landroid/content/Context;[Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;
+    invoke-static {v0, v1, p0}, Lio/mesalabs/unica/utils/Utils;->getFilePickerOpenIntent(Landroid/content/Context;[Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;
 
     move-result-object p0
 
