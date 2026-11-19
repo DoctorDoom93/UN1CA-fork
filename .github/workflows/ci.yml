@@ -21,6 +21,7 @@ on:
       - 'a34x-baseline'
       - 'main'
       - 'sixteen'
+      - 'feat/rezoss-approved-mods'
     paths-ignore:
       - 'README.md'
       - '.github/workflows/blobs.yml'
@@ -30,6 +31,7 @@ on:
       - 'a34x-baseline'
       - 'main'
       - 'sixteen'
+      - 'feat/rezoss-approved-mods'
     paths-ignore:
       - 'README.md'
       - '.github/workflows/blobs.yml'

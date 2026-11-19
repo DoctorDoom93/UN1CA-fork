@@ -132,6 +132,81 @@ SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     'const-string v0, "io.mesalabs.unica."\n\n    invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z\n\n    move-result v0\n\n    if-eqz v0, :cond_unica_valid\n\n    const/4 v0, 0x1\n\n    return v0\n\n    :cond_unica_valid\n    const/4 p0, 0x0' \
     > /dev/null
 
+# Add UN1CA permissions to SecSettings AndroidManifest.xml
+SETTINGS_MANIFEST="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/AndroidManifest.xml"
+if [ -f "$SETTINGS_MANIFEST" ]; then
+    for PERM in \
+        "io.mesalabs.rezoss.permission.QWEN_ENGINE" \
+        "android.permission.READ_LOGS" \
+        "android.permission.QUERY_ALL_PACKAGES" \
+        "android.permission.KILL_UID" \
+        "android.permission.ACCESS_SHORTCUTS" \
+        "com.android.alarm.permission.SET_ALARM"; do
+        if ! grep -q "android:name=\"$PERM\"" "$SETTINGS_MANIFEST"; then
+            sed -i "/<\/manifest>/i \    <uses-permission android:name=\"$PERM\"/>" "$SETTINGS_MANIFEST"
+        fi
+    done
+fi
+
+# Hook Settings background transparency into SecSettingsBaseActivity
+BASE_ACTIVITY="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -name "SecSettingsBaseActivity.smali" -print -quit)"
+if [ -n "$BASE_ACTIVITY" ]; then
+    LOG "- Hooking Settings background transparency into ${BASE_ACTIVITY#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
+    python3 - "$BASE_ACTIVITY" << 'EOF'
+import sys
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+hook = '    invoke-static {p0}, Lio/mesalabs/unica/settings/display/SettingsBackgroundTransparencyUtils;->apply(Landroid/content/Context;)V\n'
+new_lines = []
+in_target_method = False
+
+for line in lines:
+    if line.startswith('.method ') and (' onCreate(' in line or ' onResume(' in line):
+        in_target_method = True
+    elif line.startswith('.end method'):
+        in_target_method = False
+    elif in_target_method and line.strip() == 'return-void':
+        if not any('SettingsBackgroundTransparencyUtils;->apply' in l for l in new_lines[-5:]):
+            new_lines.append(hook)
+    new_lines.append(line)
+
+with open(path, 'w', encoding='utf-8') as f:
+    f.writelines(new_lines)
+EOF
+fi
+
+# Hook Quick Tiles routeLongPress into QSTileLongPressGatewayActivity
+QS_GATEWAY="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -name "QSTileLongPressGatewayActivity.smali" -print -quit)"
+if [ -n "$QS_GATEWAY" ]; then
+    LOG "- Hooking Quick Tiles into ${QS_GATEWAY#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
+    python3 - "$QS_GATEWAY" << 'EOF'
+import sys
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+target = 'invoke-super {p0, p1}, Landroidx/fragment/app/FragmentActivity;->onCreate(Landroid/os/Bundle;)V'
+replacement = target + '''
+
+    invoke-static {p0}, Lio/mesalabs/unica/quicktiles/TileConfig;->routeLongPress(Landroid/app/Activity;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_unica_quick_tile_stock
+
+    return-void
+
+    :cond_unica_quick_tile_stock'''
+
+if target in content and 'routeLongPress' not in content:
+    content = content.replace(target, replacement, 1)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+EOF
+fi
+
 if [ -f "$WORK_DIR/system/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" ]; then
     DECODE_APK "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk"
     TOP_KEYS="smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali"
@@ -170,6 +245,105 @@ fi
 # Show Vulkan renderer toggle if required
 if [[ "$(GET_PROP "ro.hwui.use_vulkan")" != "true" ]]; then
     SET_PROP "system" "persist.sys.unica.vulkan" "false"
+fi
+
+# Relax SDHMS policy control
+if [ -d "$MODPATH/thermal" ] && [ -f "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" ]; then
+    LOG "- Installing Relax SDHMS policy control"
+    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" || true
+fi
+
+# Troubleshooting suite
+if [ -d "$MODPATH/troubleshooting" ]; then
+    LOG "- Compiling Troubleshooting compatibility catalog and policies"
+    python3 "$MODPATH/troubleshooting/compile-catalog.py" \
+        --output-dir "$WORK_DIR/system/system/etc/unica" --no-backup 2>/dev/null || true
+    for _UNICA_COMPAT_TABLE in troubleshooting-root-purposes.tsv troubleshooting-lsposed-purposes.json troubleshooting-lsposed-conflicts.json troubleshooting-registry-info.json; do
+        [ -f "$WORK_DIR/system/system/etc/unica/$_UNICA_COMPAT_TABLE" ] && SET_METADATA "system" "system/etc/unica/$_UNICA_COMPAT_TABLE" 0 0 644 "u:object_r:system_file:s0"
+    done
+    unset _UNICA_COMPAT_TABLE
+    python3 "$MODPATH/troubleshooting/install-policy.py" "$WORK_DIR" 2>/dev/null || true
+    python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" 2>/dev/null || true
+    [ -f "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" ] && SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"
+    [ -f "$WORK_DIR/system/system/bin/unica-troubleshooting" ] && SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"
+fi
+
+# Allow runtime camera feature override in SamsungCamera
+if [ -f "$WORK_DIR/system/system/priv-app/SamsungCamera/SamsungCamera.apk" ]; then
+    DECODE_APK "system" "system/priv-app/SamsungCamera/SamsungCamera.apk"
+    LOG "- Hooking SamsungCamera runtime camera feature override"
+    python3 - "$APKTOOL_DIR/system/priv-app/SamsungCamera/SamsungCamera.apk" << 'EOF'
+import sys, re
+from pathlib import Path
+
+apk_dir = Path(sys.argv[1])
+for smali_file in apk_dir.rglob("*.smali"):
+    content = smali_file.read_text(encoding="utf-8", errors="ignore")
+    if "FeatureLoader" in content and "loadFeature : start" in content:
+        if "getCameraFeatureFile" in content:
+            break
+
+        m_class = re.search(r'^\.class\s+.*?([L][^;\s]+;)', content, re.MULTILINE)
+        if not m_class:
+            continue
+        class_desc = m_class.group(1)
+
+        m_fis = re.search(r'invoke-direct\s*\{[^,]+,\s*(v\d+)\},\s*Ljava/io/FileInputStream;-><init>\(Ljava/io/File;\)V', content)
+        if not m_fis:
+            continue
+
+        file_reg = m_fis.group(1)
+        pattern_init = re.compile(
+            rf'(invoke-direct\s*\{{{file_reg},\s*v\d+\}},\s*Ljava/io/File;-><init>\(Ljava/lang/String;\)V)',
+            re.MULTILINE
+        )
+
+        sub_content = content[:m_fis.start()]
+        matches = list(pattern_init.finditer(sub_content))
+        if not matches:
+            continue
+
+        insert_pos = matches[-1].end()
+        hook = f"\n\n    invoke-static {{{file_reg}}}, {class_desc}->getCameraFeatureFile(Ljava/io/File;)Ljava/io/File;\n\n    move-result-object {file_reg}"
+
+        helper_method = """
+
+.method private static getCameraFeatureFile(Ljava/io/File;)Ljava/io/File;
+    .registers 7
+
+    new-instance v0, Ljava/io/File;
+
+    const-string v1, "/sdcard/Download/unica/unica_camera_feature.xml"
+
+    invoke-direct {v0, v1}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0}, Ljava/io/File;->exists()Z
+
+    move-result v2
+
+    if-eqz v2, :cond_unica_stock
+
+    invoke-virtual {v0}, Ljava/io/File;->length()J
+
+    move-result-wide v2
+
+    const-wide/16 v4, 0x0
+
+    cmp-long v2, v2, v4
+
+    if-lez v2, :cond_unica_stock
+
+    return-object v0
+
+    :cond_unica_stock
+    return-object p0
+.end method
+"""
+        new_content = content[:insert_pos] + hook + content[insert_pos:] + helper_method
+        smali_file.write_text(new_content, encoding="utf-8")
+        break
+EOF
 fi
 
 unset PATCH_INST CONTENT SW_UTILS ONEUI_CONTROLLER MODEL_GETTER TOP_KEYS

@@ -329,6 +329,40 @@ fi
 # SEC_PRODUCT_FEATURE_KNOX_SUPPORT_UCS
 # SEC_PRODUCT_FEATURE_FRAMEWORK_SUPPORT_MOBILE_PAYMENT
 
+# Guard missing Knox application restrictions service and recents policy
+LOG "- Guarding missing Knox application restrictions and recents policy in services.jar"
+KNOX_CUSTOM_SVC="$(find "$APKTOOL_DIR/system/framework/services.jar" -name "KnoxCustomManagerService.smali" -print -quit)"
+if [ -n "$KNOX_CUSTOM_SVC" ]; then
+    python3 - "$KNOX_CUSTOM_SVC" << 'EOF'
+import sys
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8') as f:
+    c = f.read()
+target = 'iget-object p0, p0, Lcom/samsung/android/knox/custom/KnoxCustomManagerService;->mApplicationRestrictionsInternal:Lcom/samsung/android/knox/localservice/ApplicationRestrictionsInternal;'
+guard = target + '\n\n    if-eqz p0, :cond_0'
+if target in c and 'if-eqz p0, :cond_0' not in c:
+    c = c.replace(target, guard, 1)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(c)
+EOF
+fi
+
+RECENT_TASKS="$(find "$APKTOOL_DIR/system/framework/services.jar" -name "RecentTasks.smali" -print -quit)"
+if [ -n "$RECENT_TASKS" ]; then
+    python3 - "$RECENT_TASKS" << 'EOF'
+import sys
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8') as f:
+    c = f.read()
+target = 'check-cast v5, Lcom/samsung/android/knox/localservice/ApplicationPolicyInternal;'
+guard = target + '\n\n    if-eqz v5, :cond_5'
+if target in c and 'if-eqz v5, :cond_5' not in c:
+    c = c.replace(target, guard, 1)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(c)
+EOF
+fi
+
 LOG "- Restoring original SourceFile attribute in /system/system/framework/services.jar"
 find "$APKTOOL_DIR/system/framework/services.jar" -type f -name "*.smali" -print0 \
     | xargs -0 -I "{}" -P "$(nproc)" sed -i "s/^\.source.*/$SOURCE_FILE_ATTR/g" "{}"

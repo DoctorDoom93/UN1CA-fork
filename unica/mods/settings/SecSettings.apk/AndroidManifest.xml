@@ -47,3 +47,47 @@
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.ui.UISettingsFragment"/>
             <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
+        <activity android:name="io.mesalabs.unica.troubleshooting.TroubleshootingActivity" android:exported="false" android:configChanges="keyboardHidden|orientation|screenSize" android:label="@string/unica_troubleshooting_title"/>
+        <activity android:name="io.mesalabs.unica.movecertificate.MoveCertificateActivity" android:exported="false" android:label="@string/unica_movecert_title"/>
+        <activity android:name="io.mesalabs.unica.quicktiles.ConfigActivity" android:exported="false" android:label="@string/unica_quick_tiles_title"/>
+        <activity android:name="io.mesalabs.unica.quicktiles.ShortcutActivity" android:exported="false" android:excludeFromRecents="true"/>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot1" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 1" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot2" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 2" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot3" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 3" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot4" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 4" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot5" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 5" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot6" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 6" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot7" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 7" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        <service android:name="io.mesalabs.unica.quicktiles.QuickTile$Slot8" android:exported="true" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:label="UN1CA Tile 8" android:icon="@drawable/unica_qt_app">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
