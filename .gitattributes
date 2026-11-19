@@ -5,6 +5,7 @@
 
 # Common file extensions
 *.apk binary
+*.apk.* binary
 *.apex binary
 *.bin binary
 *.so binary
@@ -25,6 +26,7 @@
 prebuilts/bootable/deprecated-ota/updater binary
 prebuilts/*/*/*/** binary
 unica/mods/paradigm/system/** binary
+unica/mods/rezoss/system/** binary
 unica/mods/prophide/system/bin/rezetprop binary
 unica/mods/rezoss/local-summary-service/system/bin/** binary
 
