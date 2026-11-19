@@ -54,6 +54,17 @@ if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$MODEL_GETTER"
         'ro.boot.em.model'
 fi
 
+# Ensure Galaxy AI / Intelligence Service does not finish/vanish
+USEFUL_UTILS="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -name "UsefulfeatureUtils.smali" -print -quit)"
+if [ -n "$USEFUL_UTILS" ]; then
+    USEFUL_UTILS_REL="${USEFUL_UTILS#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
+    LOG "- Enabling Galaxy AI availability in $USEFUL_UTILS_REL"
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$USEFUL_UTILS_REL" "return" \
+        'isSupportedIntelligenceService(Landroid/content/Context;)Z' \
+        'true' || true
+fi
+
 LOG_STEP_IN "- Adding UN1CA Settings"
 
 # Dynamically patch SecSettings
@@ -118,7 +129,9 @@ if [ -n "$SEARCH_INDEX_RESOURCES" ]; then
         "io/mesalabs/unica/settings/ui/UISettingsFragment" \
         "io/mesalabs/unica/settings/spoof/CameraFeatureFragment" \
         "io/mesalabs/unica/settings/font/FontSelectorFragment" \
-        "io/mesalabs/unica/settings/extra/ScpmAllowlistFragment"; do
+        "io/mesalabs/unica/settings/extra/ScpmAllowlistFragment" \
+        "io/mesalabs/unica/settings/design/AudioTweaksFragment" \
+        "io/mesalabs/unica/settings/design/BatteryPerformanceFragment"; do
         ADD_UNICA_SETTINGS_SEARCH_INDEX_DATA_PROVIDER "$f" || return 1
     done
 fi
