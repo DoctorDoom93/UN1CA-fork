@@ -151,8 +151,10 @@ DELETE_FROM_WORK_DIR "system" "system/priv-app/PhotoEditor_Full"
 ADD_TO_WORK_DIR "b7sxxx" "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" 0 0 644 "u:object_r:system_file:s0"
 # Enable text-based create tab, part of 20261 Galaxy AI features
 DECODE_APK "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk"
-if [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali_classes4/q4/b.smali" ] || [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali/q4/b.smali" ]; then
-    SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "q4/b.smali" "return" "t()Z" "true"
+if [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali_classes4/q4/b.smali" ]; then
+    SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "smali_classes4/q4/b.smali" "return" "t()Z" "true"
+elif [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali/q4/b.smali" ]; then
+    SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "smali/q4/b.smali" "return" "t()Z" "true"
 elif [ -f "$APKTOOL_DIR/system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk/smali_classes4/K1/c.smali" ]; then
     SMALI_PATCH "system" "system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk" "smali_classes4/K1/c.smali" "replace" "D()V" "move-result v0" "const/16 v0, 0x4f25"
 else

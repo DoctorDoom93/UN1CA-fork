@@ -65,7 +65,18 @@ BUILD()
             SHORTEN_RESOURCE_PATHS=false
             PREPARE_SMARTSUGGESTIONS_PACKAGING
             ;;
+        "system:system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk")
+            if (( THREAD_COUNT > 2 )); then
+                LOG "- Limiting apktool threads for ${INPUT_FILE//$WORK_DIR/} to 2 to avoid JVM heap exhaustion"
+                THREAD_COUNT=2
+            fi
+            SHORTEN_RESOURCE_PATHS=false
+            ;;
     esac
+
+    if [ ! -d "$OUTPUT_PATH/res" ]; then
+        SHORTEN_RESOURCE_PATHS=false
+    fi
 
     LOG "- Building ${INPUT_FILE//$WORK_DIR/}"
 
@@ -176,12 +187,20 @@ DECODE()
 
     LOG "- Decoding ${INPUT_FILE//$WORK_DIR/}"
 
+    local DECODE_ARGS="--no-debug-info"
+
+    case "$PARTITION:$FILE" in
+        "system:system/priv-app/PhotoEditor_AIFull/PhotoEditor_AIFull.apk")
+            DECODE_ARGS+=" -r"
+            ;;
+    esac
+
     # Decode APK with --no-debug-info, which will disassemble DEX file with the following flags:
     # - Disabled synthetic accessors comments
     # - Disabled debug info
     # - Use .locals directive instead of the .registers one
     # - Use a sequential numbering scheme for labels
-    EVAL "apktool -JXmx${HEAP_SIZE}m d --no-debug-info -j \"$THREAD_COUNT\" -o \"$OUTPUT_PATH\" -p \"$FRAMEWORK_DIR\" -t \"$FRAMEWORK_TAG\" \"$INPUT_FILE\"" || exit 1
+    EVAL "apktool -JXmx${HEAP_SIZE}m d $DECODE_ARGS -j \"$THREAD_COUNT\" -o \"$OUTPUT_PATH\" -p \"$FRAMEWORK_DIR\" -t \"$FRAMEWORK_TAG\" \"$INPUT_FILE\"" || exit 1
 }
 
 PREPARE_SCRIPT()
