@@ -15,11 +15,11 @@ if len(sys.argv) != 3:
 verify(Path(sys.argv[2]))
 work = Path(sys.argv[2])
 for relative in (
-    'system/system/priv-app/TeeSimulatorSettings/TeeSimulatorSettings.apk',
-    'system/system/etc/permissions/privapp-permissions-io.mesalabs.unica.teesettings.xml',
-    'system/system/etc/sysconfig/preinstalled-packages-io.mesalabs.unica.teesettings.xml',
+    'priv-app/TeeSimulatorSettings/TeeSimulatorSettings.apk',
+    'etc/permissions/privapp-permissions-io.mesalabs.unica.teesettings.xml',
+    'etc/sysconfig/preinstalled-packages-io.mesalabs.unica.teesettings.xml',
 ):
-    if not (work / relative).is_file():
+    if not ((work / 'system/system' / relative).is_file() or (work / 'system' / relative).is_file()):
         raise SystemExit('Missing TEE Settings install dependency: ' + relative)
 path = Path(sys.argv[1])
 text = path.read_text()

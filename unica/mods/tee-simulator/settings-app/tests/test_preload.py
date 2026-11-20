@@ -5,6 +5,7 @@
 import importlib.util
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -15,7 +16,7 @@ spec.loader.exec_module(preload)
 
 class PreloadTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='tee-preload-', dir='/tmp')
+        self.temp = tempfile.TemporaryDirectory(prefix='tee-preload-')
         self.work = Path(self.temp.name)
         self.path = self.work / preload.RELATIVE
         self.path.parent.mkdir(parents=True)
@@ -44,7 +45,7 @@ class PreloadTests(unittest.TestCase):
         screen = self.work / 'screen.xml'
         original = '<PreferenceScreen><intent android:targetPackage="com.android.settings" android:targetClass="io.mesalabs.unica.keybox.KeyboxActivity" xmlns:android="http://schemas.android.com/apk/res/android"/></PreferenceScreen>'
         screen.write_text(original)
-        command = ['python3', str(APP / 'route_settings.py'), str(screen), str(self.work)]
+        command = [sys.executable, str(APP / 'route_settings.py'), str(screen), str(self.work)]
         self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
         self.assertEqual(original, screen.read_text())
         preload.install(self.work)

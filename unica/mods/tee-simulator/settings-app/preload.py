@@ -9,14 +9,22 @@ import xml.etree.ElementTree as ET
 PACKAGE = 'io.mesalabs.unica.teesettings'
 RELATIVE = 'system/system/etc/sysconfig/allowed-system-preload-apps.xml'
 
+def get_config_path(work):
+    for rel in ('system/system/etc/sysconfig/allowed-system-preload-apps.xml',
+                'system/etc/sysconfig/allowed-system-preload-apps.xml'):
+        p = Path(work) / rel
+        if p.is_file():
+            return p
+    return Path(work) / RELATIVE
+
 def verify(work):
-    path = Path(work) / RELATIVE
+    path = get_config_path(work)
     root = ET.fromstring(path.read_text())
     if root.tag != 'config' or len(root.findall(f"allowed-system-preload[@package='{PACKAGE}']")) != 1:
         raise ValueError('TEE Settings missing or duplicated in Samsung preload allowlist')
 
 def install(work):
-    path = Path(work) / RELATIVE
+    path = get_config_path(work)
     text = path.read_text()
     root = ET.fromstring(text)
     if root.tag != 'config':
