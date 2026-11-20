@@ -167,10 +167,16 @@ if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "34" ]; then
             > /dev/null
         SMALI_PATCH "system" "system/framework/services.jar" \
             "smali/com/android/server/biometrics/sensors/face/aidl/SemFaceServiceExImpl\$\$ExternalSyntheticLambda6.smali" "remove"
-        LOG "- Removing \"smali_classes2/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace.smali\" from /system/system/framework/services.jar"
-        EVAL "rm \"$APKTOOL_DIR/system/framework/services.jar/smali_classes2/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace.smali\""
-        LOG "- Removing \"smali_classes2/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace\$Proxy.smali\" from /system/system/framework/services.jar"
-        EVAL "rm \"$APKTOOL_DIR/system/framework/services.jar/smali_classes2/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace\\\$Proxy.smali\""
+        FACE_SMALI="$(find "$APKTOOL_DIR/system/framework/services.jar" -path "*/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace.smali" 2>/dev/null | head -n 1)"
+        if [ -n "$FACE_SMALI" ] && [ -f "$FACE_SMALI" ]; then
+            LOG "- Removing \"${FACE_SMALI#"$APKTOOL_DIR/system/framework/services.jar/"}\" from /system/system/framework/services.jar"
+            rm -f "$FACE_SMALI"
+        fi
+        FACE_PROXY_SMALI="$(find "$APKTOOL_DIR/system/framework/services.jar" -path "*/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace\$Proxy.smali" 2>/dev/null | head -n 1)"
+        if [ -n "$FACE_PROXY_SMALI" ] && [ -f "$FACE_PROXY_SMALI" ]; then
+            LOG "- Removing \"${FACE_PROXY_SMALI#"$APKTOOL_DIR/system/framework/services.jar/"}\" from /system/system/framework/services.jar"
+            rm -f "$FACE_PROXY_SMALI"
+        fi
         SMALI_PATCH "system" "system/framework/services.jar" \
             "smali_classes2/vendor/samsung/hardware/biometrics/face/V3_0/ISehBiometricsFace\$Stub\$1.smali" "remove"
         SMALI_PATCH "system" "system/framework/services.jar" \

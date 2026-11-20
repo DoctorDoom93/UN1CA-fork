@@ -126,7 +126,10 @@ if $SOURCE_AUDIO_SUPPORT_VIRTUAL_VIBRATION_SOUND; then
             "$MODPATH/audio/virtual_vib/services.jar/0001-Disable-virtual-vibration-support.patch"
         SMALI_PATCH "system" "system/framework/services.jar" \
             "smali/com/android/server/audio/BtHelper\$\$ExternalSyntheticLambda0.smali" "remove"
-        EVAL "sed -i \"/.source/q\" \"$APKTOOL_DIR/system/framework/services.jar/smali_classes2/com/android/server/vibrator/VibratorManagerInternal.smali\""
+        TARGET_VIB_INTERNAL="$(find "$APKTOOL_DIR/system/framework/services.jar" -path "*/com/android/server/vibrator/VibratorManagerInternal.smali" 2>/dev/null | head -n 1)"
+        if [ -n "$TARGET_VIB_INTERNAL" ] && [ -f "$TARGET_VIB_INTERNAL" ]; then
+            sed -i "/.source/q" "$TARGET_VIB_INTERNAL"
+        fi
         SMALI_PATCH "system" "system/framework/services.jar" \
             "smali_classes2/com/android/server/vibrator/VibratorManagerService\$SamsungBroadcastReceiver\$\$ExternalSyntheticLambda1.smali" "remove"
         SMALI_PATCH "system" "system/framework/services.jar" \
@@ -216,7 +219,10 @@ if ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
             "$MODPATH/resolution/SecSettings.apk/0001-Enable-dynamic-resolution-control.patch"
         SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
             "smali_classes2/com/android/settings/Utils\$\$ExternalSyntheticLambda2.smali" "remove"
-        EVAL "sed -i \"s/^\.implements.*/.implements Landroidx\/core\/view\/OnApplyWindowInsetsListener;/g\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes2/com/android/settings/Utils\\\$\\\$ExternalSyntheticLambda3.smali\""
+        TARGET_UTILS_LAMBDA3="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -path "*/com/android/settings/Utils\$\$ExternalSyntheticLambda3.smali" 2>/dev/null | head -n 1)"
+        if [ -n "$TARGET_UTILS_LAMBDA3" ] && [ -f "$TARGET_UTILS_LAMBDA3" ]; then
+            sed -i "s/^\.implements.*/.implements Landroidx\/core\/view\/OnApplyWindowInsetsListener;/g" "$TARGET_UTILS_LAMBDA3"
+        fi
         SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
             "smali_classes2/com/android/settings/applications/manageapplications/ManageApplications\$ApplicationsAdapter\$\$ExternalSyntheticLambda3.smali" "remove"
         SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
@@ -228,7 +234,10 @@ if ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
         if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "36" ]; then
             APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
                 "$MODPATH/resolution/SecSettings.apk/0002-Backport-legacy-DYN_RESOLUTION_CONTROL-code.patch"
-            EVAL "sed -i \"/static fields/,+3d\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes4/com/samsung/android/settings/display/ScreenResolutionFragment.smali\""
+            TARGET_SCREEN_RES="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -path "*/com/samsung/android/settings/display/ScreenResolutionFragment.smali" 2>/dev/null | head -n 1)"
+            if [ -n "$TARGET_SCREEN_RES" ] && [ -f "$TARGET_SCREEN_RES" ]; then
+                sed -i "/static fields/,+3d" "$TARGET_SCREEN_RES"
+            fi
             SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
                 "smali_classes4/com/samsung/android/settings/display/controller/ScreenResolutionPreferenceController\$2.smali" "remove"
         fi
@@ -373,10 +382,16 @@ if [[ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "$TARGET_FINGERPRINT_CONFIG_SENSOR"
                     "$MODPATH/fingerprint/side_fp/framework.jar/0001-Add-side-fingerprint-sensor-support.patch"
                 APPLY_PATCH "system" "system/framework/services.jar" \
                     "$MODPATH/fingerprint/side_fp/services.jar/0001-Add-side-fingerprint-sensor-support.patch"
-                EVAL "sed -i \"/implements/i .implements Lcom\/android\/server\/biometrics\/sensors\/fingerprint\/SemFpHalLifecycleListener;\" \"$APKTOOL_DIR/system/framework/services.jar/smali/com/android/server/biometrics/sensors/fingerprint/SemFingerprintServiceExtImpl.smali\""
+                TARGET_FP_EXT="$(find "$APKTOOL_DIR/system/framework/services.jar" -path "*/com/android/server/biometrics/sensors/fingerprint/SemFingerprintServiceExtImpl.smali" 2>/dev/null | head -n 1)"
+                if [ -n "$TARGET_FP_EXT" ] && [ -f "$TARGET_FP_EXT" ]; then
+                    sed -i "/implements/i .implements Lcom/android/server/biometrics/sensors/fingerprint/SemFpHalLifecycleListener;" "$TARGET_FP_EXT"
+                fi
                 APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
                     "$MODPATH/fingerprint/side_fp/SecSettings.apk/0001-Add-side-fingerprint-sensor-support.patch"
-                EVAL "sed -i \"s/^\.implements.*/.implements Landroid\/widget\/CompoundButton\$OnCheckedChangeListener;/g\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes4/com/samsung/android/settings/biometrics/fingerprint/SuwFingerprintUsefulFeature\\\$\\\$ExternalSyntheticLambda1.smali\""
+                TARGET_SUW_LAMBDA1="$(find "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" -path "*/com/samsung/android/settings/biometrics/fingerprint/SuwFingerprintUsefulFeature\$\$ExternalSyntheticLambda1.smali" 2>/dev/null | head -n 1)"
+                if [ -n "$TARGET_SUW_LAMBDA1" ] && [ -f "$TARGET_SUW_LAMBDA1" ]; then
+                    sed -i "s/^\.implements.*/.implements Landroid\/widget\/CompoundButton\$OnCheckedChangeListener;/g" "$TARGET_SUW_LAMBDA1"
+                fi
                 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
                     "smali_classes4/com/samsung/android/settings/biometrics/fingerprint/SuwFingerprintUsefulFeature\$\$ExternalSyntheticLambda4.smali" "remove"
                 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
@@ -385,7 +400,10 @@ if [[ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "$TARGET_FINGERPRINT_CONFIG_SENSOR"
                     "smali_classes4/com/samsung/android/settings/biometrics/fingerprint/SuwFingerprintUsefulFeature\$1.smali" "remove"
                 APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
                     "$MODPATH/fingerprint/side_fp/SystemUI.apk/0001-Add-side-fingerprint-sensor-support.patch"
-                EVAL "sed -i \"s/^\.implements.*/.implements Ljava\/util\/function\/Consumer;/g\" \"$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk/smali/com/android/keyguard/KeyguardSecUpdateMonitorImpl\\\$\\\$ExternalSyntheticLambda28.smali\""
+                TARGET_KG_LAMBDA28="$(find "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk" -path "*/com/android/keyguard/KeyguardSecUpdateMonitorImpl\$\$ExternalSyntheticLambda28.smali" 2>/dev/null | head -n 1)"
+                if [ -n "$TARGET_KG_LAMBDA28" ] && [ -f "$TARGET_KG_LAMBDA28" ]; then
+                    sed -i "s/^\.implements.*/.implements Ljava\/util\/function\/Consumer;/g" "$TARGET_KG_LAMBDA28"
+                fi
                 SMALI_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
                     "smali/com/android/keyguard/KeyguardSecUpdateMonitorImpl\$\$ExternalSyntheticLambda24.smali" "remove"
                 SMALI_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
