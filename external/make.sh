@@ -194,7 +194,7 @@ if $APKTOOL; then
     APKTOOL_CMDS=(
         "git reset --hard"
         "for p in \"$SRC_DIR/external/patches/apktool/\"*.patch; do git apply \"\$p\"; done"
-        "./gradlew shadowJar -x test"
+        "for i in 1 2 3; do ./gradlew shadowJar -x test && break || { [ \"\$i\" -lt 3 ] && sleep 10; }; done"
         "cp -a \"scripts/linux/apktool\" \"$TOOLS_DIR/bin\""
         "cp -a \"brut.apktool/apktool-cli/build/libs/apktool-cli.jar\" \"$TOOLS_DIR/bin/apktool.jar\""
     )

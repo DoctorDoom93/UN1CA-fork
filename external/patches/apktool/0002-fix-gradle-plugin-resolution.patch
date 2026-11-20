@@ -1,8 +1,8 @@
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 8fa84724..b7778399 100644
+index 8fa84724..9f096bae 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -59,7 +59,7 @@ extra.set("apktoolVersion", apktoolVersion)
+@@ -59,12 +59,13 @@ extra.set("apktoolVersion", apktoolVersion)
  
  plugins {
      `java-library`
@@ -11,7 +11,13 @@ index 8fa84724..b7778399 100644
  }
  
  allprojects {
-@@ -144,7 +144,7 @@ subprojects {
+     repositories {
+         mavenCentral()
++        maven { url = uri("https://maven.aliyun.com/repository/central") }
+         // Obtain baksmali/smali from source builds - https://github.com/iBotPeaches/smali
+         // Remove when official smali releases come out again.
+         maven {
+@@ -144,7 +145,7 @@ subprojects {
          "apktool-lib"
      )
  
@@ -21,14 +27,15 @@ index 8fa84724..b7778399 100644
      }
  }
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 8ba50924..2752f7a7 100644
+index 8ba50924..19c1df26 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -1,3 +1,10 @@
+@@ -1,3 +1,11 @@
 +pluginManagement {
 +    repositories {
 +        gradlePluginPortal()
 +        mavenCentral()
++        maven { url = uri("https://maven.aliyun.com/repository/central") }
 +    }
 +}
 +
