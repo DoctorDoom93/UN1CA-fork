@@ -13,10 +13,10 @@ Subject: [PATCH] Remove Style-tab Depth Effect toggle
      </LinearLayout>
 --- a/smali_classes2/vo/x.smali
 +++ b/smali_classes2/vo/x.smali
-@@ -1503,7 +1503,6 @@
-
+@@ -1503,6 +1503,5 @@
+ 
      invoke-static {v2, v7}, Lio/mesalabs/unica/lockscreen/EditorHooks;->clock(Ljava/lang/Object;Ljava/lang/Object;)V
-
+ 
 -    invoke-static {v2}, Lio/mesalabs/unica/depth/DepthEffectToggle;->bind(Landroid/view/View;)V
-
+ 
      iget-object v7, v0, Lvo/x;->a:Landroidx/lifecycle/LifecycleOwner;

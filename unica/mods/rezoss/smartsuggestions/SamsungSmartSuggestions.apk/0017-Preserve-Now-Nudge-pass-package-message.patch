@@ -15,11 +15,11 @@ has the app-exposed message payload.
 diff --git a/smali_classes11/com/samsung/android/moneta/datacollector/application/notification/PdeNotificationListenerService.smali b/smali_classes11/com/samsung/android/moneta/datacollector/application/notification/PdeNotificationListenerService.smali
 --- a/smali_classes11/com/samsung/android/moneta/datacollector/application/notification/PdeNotificationListenerService.smali
 +++ b/smali_classes11/com/samsung/android/moneta/datacollector/application/notification/PdeNotificationListenerService.smali
-@@ -1995,7 +1995,7 @@
-
+@@ -1995,6 +1995,6 @@
+ 
      iget-object v12, v0, Lxo/b;->h:Ljava/lang/String;
-
+ 
 -    const-string v13, ""
 +    iget-object v13, v0, Lxo/b;->i:Ljava/lang/String;
-
+ 
      invoke-direct/range {v3 .. v13}, Lxo/b;-><init>(Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V

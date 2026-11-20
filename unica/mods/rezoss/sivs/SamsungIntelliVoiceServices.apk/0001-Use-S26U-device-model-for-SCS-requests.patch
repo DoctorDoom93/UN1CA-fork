@@ -10,15 +10,15 @@ Now Brief custom-card generation instead of changing global build props.
 diff --git a/smali/com/samsung/android/intellivoiceservice/common/connection/server/LlmClientInterceptor.smali b/smali/com/samsung/android/intellivoiceservice/common/connection/server/LlmClientInterceptor.smali
 --- a/smali/com/samsung/android/intellivoiceservice/common/connection/server/LlmClientInterceptor.smali
 +++ b/smali/com/samsung/android/intellivoiceservice/common/connection/server/LlmClientInterceptor.smali
-@@ -209,11 +209,7 @@
-
+@@ -209,10 +209,6 @@
+ 
      move-result-object v3
-
+ 
 -    sget-object v4, Landroid/os/Build;->MODEL:Ljava/lang/String;
 -
 -    invoke-static {v4}, Ljava/lang/String;->valueOf(Ljava/lang/Object;)Ljava/lang/String;
 -
 -    move-result-object v4
 +    const-string v4, "SM-S948B"
-
+ 
      const-string v5, "device-model"
