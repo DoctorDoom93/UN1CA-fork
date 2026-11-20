@@ -381,7 +381,12 @@
 
     const-string v2, "true"
 
+    :try_start_prop
     invoke-static {v0, v2}, Landroid/os/SemSystemProperties;->set(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_prop
+    .catch Ljava/lang/Exception; {:try_start_prop .. :try_end_prop} :catch_prop
+
+    :catch_prop
 
     const/4 v0, 0x0
 
