@@ -6,12 +6,19 @@ import hashlib
 from pathlib import Path
 
 
+def digest_file(p):
+    content = p.read_bytes()
+    if p.suffix == '.bat':
+        content = content.replace(b'\r\n', b'\n').replace(b'\n', b'\r\n')
+    return hashlib.sha256(content).hexdigest()
+
+
 def current(root):
     sources = sorted((p for p in (root / 'source').rglob('*') if p.is_file()),
                      key=lambda p: p.relative_to(root).parts)
     sources += [root / name for name in (
         'build_backend.py', 'upstream.lock.json', 'jvm-dependencies.sha256.json')]
-    return ''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(root).as_posix()}\n'
+    return ''.join(f'{digest_file(p)}  {p.relative_to(root).as_posix()}\n'
                    for p in sources)
 
 
