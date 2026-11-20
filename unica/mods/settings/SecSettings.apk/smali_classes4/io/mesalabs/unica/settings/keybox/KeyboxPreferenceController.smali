@@ -243,13 +243,32 @@
 .end method
 
 .method public isChecked()Z
-    .locals 0
+    .locals 3
 
-    invoke-static {}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->isKeyboxSpoofEnabled()Z
+    iget-object v0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 
-    move-result p0
+    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 
-    return p0
+    move-result-object v0
+
+    const-string v1, "unica_keybox_enabled"
+
+    const/4 v2, 0x1
+
+    invoke-static {v0, v1, v2}, Landroid/provider/Settings$Secure;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    const/4 v0, 0x1
+
+    return v0
+
+    :cond_0
+    const/4 v0, 0x0
+
+    return v0
 .end method
 
 .method public isControllable()Z
@@ -329,7 +348,7 @@
 .end method
 
 .method public setChecked(Z)Z
-    .locals 2
+    .locals 3
 
     const-string v0, "persist.sys.unica.keybox"
 
@@ -338,6 +357,16 @@
     move-result-object v1
 
     invoke-static {v0, v1}, Landroid/os/SemSystemProperties;->set(Ljava/lang/String;Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
+
+    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v0
+
+    const-string v1, "unica_keybox_enabled"
+
+    invoke-static {v0, v1, p1}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
 
     iget-object v0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 

@@ -124,7 +124,7 @@
 
     const-string v0, "persist.sys.unica.keybox"
 
-    const/4 v1, 0x0
+    const/4 v1, 0x1
 
     invoke-static {v0, v1}, Landroid/os/SemSystemProperties;->getBoolean(Ljava/lang/String;Z)Z
 
@@ -370,6 +370,18 @@
     const-string v3, "unica_keybox_data"
 
     invoke-static {v2, v3, v0}, Landroid/provider/Settings$Secure;->putString(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;)Z
+
+    const-string v0, "unica_keybox_enabled"
+
+    const/4 v3, 0x1
+
+    invoke-static {v2, v0, v3}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
+
+    const-string v0, "persist.sys.unica.keybox"
+
+    const-string v2, "true"
+
+    invoke-static {v0, v2}, Landroid/os/SemSystemProperties;->set(Ljava/lang/String;Ljava/lang/String;)V
 
     const/4 v0, 0x0
 
