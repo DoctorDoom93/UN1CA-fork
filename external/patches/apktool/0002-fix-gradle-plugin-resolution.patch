@@ -1,0 +1,28 @@
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 8fa84724..3b9a2ead 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -59,7 +59,7 @@ extra.set("apktoolVersion", apktoolVersion)
+ 
+ plugins {
+     `java-library`
+-    alias(libs.plugins.vanniktech.maven.publish) apply false
++    // alias(libs.plugins.vanniktech.maven.publish) apply false
+ }
+ 
+ allprojects {
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 8ba50924..2752f7a7 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -1,3 +1,10 @@
++pluginManagement {
++    repositories {
++        gradlePluginPortal()
++        mavenCentral()
++    }
++}
++
+ plugins {
+     // Allows Gradle to auto-download the JDK requested via -PtestJdkVersion.
+     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"

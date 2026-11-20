@@ -193,8 +193,8 @@ fi
 if $APKTOOL; then
     APKTOOL_CMDS=(
         "git reset --hard"
-        "git apply \"$SRC_DIR/external/patches/apktool/0001-feat-support-aapt-optimization.patch\""
-        "./gradlew build shadowJar"
+        "for p in \"$SRC_DIR/external/patches/apktool/\"*.patch; do git apply \"\$p\"; done"
+        "./gradlew shadowJar -x test"
         "cp -a \"scripts/linux/apktool\" \"$TOOLS_DIR/bin\""
         "cp -a \"brut.apktool/apktool-cli/build/libs/apktool-cli.jar\" \"$TOOLS_DIR/bin/apktool.jar\""
     )
