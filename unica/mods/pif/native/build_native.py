@@ -45,7 +45,7 @@ def defaults_header():
 def verify():
     if not MANIFEST.is_file(): raise SystemExit('PIF native payload missing: run native/build_native.py')
     data = json.loads(MANIFEST.read_text())
-    actual = {str(p.resolve().relative_to(MOD.resolve())): digest(p) for p in inputs()}
+    actual = {p.resolve().relative_to(MOD.resolve()).as_posix(): digest(p) for p in inputs()}
     if actual != data['sources']: raise SystemExit('PIF native sources changed: run native/build_native.py')
     for name, sha in data['outputs'].items():
         p = (MOD / name).resolve()
